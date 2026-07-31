@@ -65,7 +65,6 @@ jobs:
   import:
     name: Godot headless import
     runs-on: ubuntu-latest
-    continue-on-error: true
     env:
       GODOT_VERSION: "4.6.0"
     steps:
@@ -84,12 +83,28 @@ jobs:
           version: ${{ env.GODOT_VERSION }}
           use-dotnet: true
 
+      - name: Build C# solution (if one exists yet)
+        run: |
+          if ls ./*.sln >/dev/null 2>&1; then
+            echo "C# solution found — building."
+            dotnet build
+          else
+            echo "No C# solution yet — GDScript-only, skipping build."
+          fi
+
       - name: Import project (headless)
         run: |
-          set -o pipefail
-          godot --headless --import --verbose 2>&1 | tee import.log || true
+          set +e
+          godot --headless --import --verbose 2>&1 | tee import.log
           echo "----- scanning import log for hard errors -----"
-          if grep -E "SCRIPT ERROR|Parse Error|Failed to load|Can't open" import.log; then
+          # Ignore the benign '.NET: Failed to load project assembly' emitted while
+          # the project declares .NET but has no built C# solution yet. Remove this
+          # exclusion once a real C# solution is committed (dotnet build will guard it).
+          hits=$(grep -E "SCRIPT ERROR|Parse Error|Failed to load|Can't open" import.log \
+            | grep -v "Failed to load project assembly")
+          if [ -n "$hits" ]; then
+            echo "----- hard errors found: -----"
+            echo "$hits"
             echo "::error::Project failed to import cleanly."
             exit 1
           fi
