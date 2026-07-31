@@ -1,0 +1,30 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Godot exports / build output
+/build/
+/builds/
+/export/
+/exports/
+
+# .NET / C# build artifacts (Godot Mono)
+# Anchored to project root so addon bin/ folders (e.g. Terrain3D native libs) are NOT ignored.
+/.mono/
+/bin/
+/obj/
+*.user
+
+# IDE / editor
+.vs/
+.idea/
+*.sln.DotSettings.user
+
+# OS junk
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Claude Code local (personal) settings
+.claude/settings.local.json

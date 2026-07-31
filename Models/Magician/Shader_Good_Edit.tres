@@ -1,0 +1,21 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://b2xbors1rj0lm"]
+
+[ext_resource type="Shader" uid="uid://dl10xcc7ylhfe" path="res://Models/Magician/Balatro.gdshader" id="1_gc7gg"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_gc7gg")
+shader_parameter/polar_coordinates = true
+shader_parameter/polar_center = Vector2(1, 1)
+shader_parameter/polar_zoom = 0.44
+shader_parameter/polar_repeat = 4.245
+shader_parameter/spin_rotation = -1.17
+shader_parameter/spin_speed = 22.335
+shader_parameter/offset = Vector2(-0.17, -0.105)
+shader_parameter/colour_1 = Color(1, 0, 0, 1)
+shader_parameter/colour_2 = Color(0, 1, 0, 1)
+shader_parameter/colour_3 = Color(0, 0, 1, 1)
+shader_parameter/contrast = 1.92
+shader_parameter/spin_amount = 0.23
+shader_parameter/pixel_filter = 698.205
+shader_parameter/triplanar_scale = 50.13

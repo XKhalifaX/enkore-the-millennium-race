@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3 uid="uid://dufya6dfed5jv"]
+
+[ext_resource type="PackedScene" uid="uid://dt2ybpq5gbr2e" path="res://Vehicle_System/vehicle_sys_test.tscn" id="1_ayklx"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(400, 1, 400)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(400, 1, 400)
+
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_color = Color(0.24, 0.24, 0.28, 1)
+metallic = 0.0
+roughness = 0.9
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("Sky_mat")
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+tonemap_mode = 2
+
+[node name="Node3D" type="Node3D" unique_id=1962728950]
+
+[node name="Vehicle_Sys_Test" parent="." unique_id=800942716 instance=ExtResource("1_ayklx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06873608, 0, -0.5038945)
+
+[node name="Ground" type="StaticBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_ground")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_ground")
+surface_material_override/0 = SubResource("Mat_ground")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.642788, 0.766044, 0, -0.766044, 0.642788, 0, 20, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")

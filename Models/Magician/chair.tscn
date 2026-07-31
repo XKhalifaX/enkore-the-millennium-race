@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://b72dwyvyi0mdn"]
+
+[ext_resource type="PackedScene" uid="uid://c1r73oyvpm2gw" path="res://Models/Magician/Chair.fbx" id="1_vgl07"]
+
+[node name="Chair" unique_id=1996568354 instance=ExtResource("1_vgl07")]
+
+[node name="PVC_Chair" parent="." index="0" unique_id=1938503727]
+transform = Transform3D(100, 0, 0, 0, 100, 7.54979e-06, 0, -7.54979e-06, 100, 0, 0, 0)
