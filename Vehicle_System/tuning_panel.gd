@@ -9,7 +9,6 @@ extends Control
 ## console and copied to the clipboard, ready to be baked into the vehicle/tuning
 ## resource permanently.
 class_name VehicleTuningPanel
-extends Control
 
 @export var vehicle : MeridianVehicle
 
