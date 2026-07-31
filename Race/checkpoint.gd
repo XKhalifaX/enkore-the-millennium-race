@@ -16,7 +16,7 @@ func _ready() -> void:
 	add_to_group("checkpoint")
 	monitoring = true
 	body_entered.connect(_on_body_entered)
-	var ph := get_node_or_null("Placeholder")
+	var ph := get_node_or_null("Placeholder") as Node3D
 	if ph:
 		ph.visible = show_placeholder
 

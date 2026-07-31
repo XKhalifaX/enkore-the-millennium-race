@@ -82,14 +82,14 @@ func _build_ui() -> void:
 	root.add_child(_center)
 
 func _find_player() -> Node3D:
-	var p := get_tree().get_first_node_in_group("player")
-	if p is Node3D:
+	var p := get_tree().get_first_node_in_group("player") as Node3D
+	if p:
 		return p
 	return _first_vehicle(get_tree().root)
 
 func _first_vehicle(node: Node) -> Node3D:
 	if node is MeridianVehicle:
-		return node
+		return node as Node3D
 	for child in node.get_children():
 		var r := _first_vehicle(child)
 		if r:

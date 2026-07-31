@@ -68,7 +68,7 @@ func _gather_racers() -> void:
 	for v in _find_vehicles(get_tree().root):
 		var rp := RacerProgress.new()
 		rp.racer = v
-		var p := v.get_parent()
+		var p = v.get_parent()
 		if p is MeridianVehicleController:
 			rp.controller = p
 		# With a full checkpoint ring the first gate to hit is index 1 (0 is the
@@ -112,7 +112,7 @@ func _get_grid_spawns() -> Array:
 func _place_on_grid() -> void:
 	var spawns := _get_grid_spawns()
 	for i in _racers.size():
-		var rp: RacerProgress = _racers[i]
+		var rp = _racers[i]
 		if rp.racer is RigidBody3D:
 			rp.racer.freeze = true
 			rp.racer.linear_velocity = Vector3.ZERO
@@ -202,7 +202,7 @@ func get_lap(racer: Node3D) -> int:
 func _progress(rp: RacerProgress) -> float:
 	var c := _checkpoints.size()
 	if c == 0:
-		return rp.lap
+		return float(rp.lap)
 	# next_index runs 1..c-1,0; gates cleared this lap = (next_index - 1) mod c.
 	var cleared := posmod(rp.next_index - 1, c)
 	return float(rp.lap * c + cleared)
