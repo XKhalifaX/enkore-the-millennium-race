@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://cmsbki14h4tfg" path="res://Vehicle_System/debug.gd" id="7_b2feu"]
 [ext_resource type="Script" uid="uid://dogwn6jvmsbi" path="res://Vehicle_System/debug_ui.gd" id="8_3dla7"]
 [ext_resource type="Script" uid="uid://bmqecb0k2eqkq" path="res://Vehicle_System/cam.gd" id="9_yofff"]
+[ext_resource type="Script" path="res://Vehicle_System/tuning_panel.gd" id="10_tune"]
 
 [node name="Vehicle_Sys_Test" type="Node3D" unique_id=800942716]
 
@@ -67,6 +68,17 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("8_3dla7")
 metadata/_edit_use_anchors_ = true
+
+[node name="TuningPanel" type="Control" parent="." node_paths=PackedStringArray("vehicle")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("10_tune")
+vehicle = NodePath("../VehicleController/VehicleRigidBody")
 
 [node name="Camera" type="SpringArm3D" parent="." unique_id=1376359540 node_paths=PackedStringArray("target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4085624, 2.635476, 3.976412)
