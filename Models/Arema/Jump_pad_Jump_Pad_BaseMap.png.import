@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jgwfcae42klq"
-path.s3tc="res://.godot/imported/prototype_512x512_white.png-bbe8020e2f325de03d0b16373fd279d0.s3tc.ctex"
+uid="uid://dxf75vh16w3bc"
+path.s3tc="res://.godot/imported/Jump_pad_Jump_Pad_BaseMap.png-4b542401410c7d45853e7a7888d79a45.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Textures/prototype_512x512_white.png"
-dest_files=["res://.godot/imported/prototype_512x512_white.png-bbe8020e2f325de03d0b16373fd279d0.s3tc.ctex"]
+source_file="res://Models/Arema/Jump_pad_Jump_Pad_BaseMap.png"
+dest_files=["res://.godot/imported/Jump_pad_Jump_Pad_BaseMap.png-4b542401410c7d45853e7a7888d79a45.s3tc.ctex"]
 
 [params]
 

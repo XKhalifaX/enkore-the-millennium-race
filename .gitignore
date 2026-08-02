@@ -28,3 +28,6 @@ Desktop.ini
 
 # Claude Code local (personal) settings
 .claude/settings.local.json
+
+# Godot editor temp files (written while saving scenes)
+*.tmp

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bovntdt2rsrnw"
-path="res://.godot/imported/Wrench+Med.fbx-6714fd82d1fc796648c8786e9283c076.scn"
+uid="uid://ckyd36pyah4pj"
+path="res://.godot/imported/Arena_PSX.fbx-02b3da7104da2059e393c17bab4faae1.scn"
 
 [deps]
 
-source_file="res://Models/Wrench+Med.fbx"
-dest_files=["res://.godot/imported/Wrench+Med.fbx-6714fd82d1fc796648c8786e9283c076.scn"]
+source_file="res://Models/Arena_PSX.fbx"
+dest_files=["res://.godot/imported/Arena_PSX.fbx-02b3da7104da2059e393c17bab4faae1.scn"]
 
 [params]
 

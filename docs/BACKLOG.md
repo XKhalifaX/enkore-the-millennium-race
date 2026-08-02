@@ -112,8 +112,8 @@ controller-first for most players.
   moving scenes later breaks paths, so do it deliberately, not twice.
 - `godot-realistic-water-master/` is an entire nested Godot project sitting in the
   repo (Godot warns and ignores it). Extract what's needed, delete the rest.
-- `Models/Magician/` is quarantined by a `.gdignore` because it references two
-  missing textures. Restore or drop it.
+- ~~`Models/Magician/` is quarantined by a `.gdignore`~~ — resolved: the folder
+  was dropped (2026-08-02), along with the unused `Wrench+Med` model.
 
 ---
 
