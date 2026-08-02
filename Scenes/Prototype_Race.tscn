@@ -1,13 +1,13 @@
 [gd_scene format=3 uid="uid://dufya6dfed5jv"]
 
 [ext_resource type="PackedScene" uid="uid://bycm70m7pr6cw" path="res://Art/Models/Arena/Jump_pad.tscn" id="1_u1002"]
-[ext_resource type="PackedScene" uid="uid://dt2ybpq5gbr2e" path="res://Game/Vehicle_System/vehicle_sys_test.tscn" id="2_k0ien"]
+[ext_resource type="PackedScene" uid="uid://dt2ybpq5gbr2e" path="res://Game/VehicleRig/vehicle_sys_test.tscn" id="2_k0ien"]
 [ext_resource type="Texture2D" uid="uid://5pe2qqi0t4db" path="res://Art/Textures/prototype_512x512_grey1.png" id="3_ewpl2"]
 [ext_resource type="Texture2D" uid="uid://dpfg6gl8qcmco" path="res://Art/Textures/prototype_512x512_grey3.png" id="4_56n0e"]
-[ext_resource type="PackedScene" uid="uid://nvnn7cnil1io" path="res://Art/Models/arena_psx.tscn" id="5_40qc8"]
-[ext_resource type="Script" uid="uid://cv1ix08r15fwd" path="res://Game/Race/race_manager.gd" id="6_mvfyj"]
-[ext_resource type="Script" uid="uid://d3e7x50s66e7q" path="res://Game/Race/race_hud.gd" id="7_yp6ad"]
-[ext_resource type="PackedScene" path="res://Game/Race/checkpoint.tscn" id="8_2b27c"]
+[ext_resource type="PackedScene" uid="uid://nvnn7cnil1io" path="res://Art/Models/Arena/arena_psx.tscn" id="5_40qc8"]
+[ext_resource type="Script" uid="uid://cv1ix08r15fwd" path="res://Game/Racing/race_manager.gd" id="6_mvfyj"]
+[ext_resource type="Script" uid="uid://d3e7x50s66e7q" path="res://Game/Racing/race_hud.gd" id="7_yp6ad"]
+[ext_resource type="PackedScene" path="res://Game/Racing/checkpoint.tscn" id="8_2b27c"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(400, 1, 400)
