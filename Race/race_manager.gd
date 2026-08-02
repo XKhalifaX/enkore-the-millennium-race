@@ -68,8 +68,10 @@ func _gather_racers() -> void:
 	for v in _find_vehicles(get_tree().root):
 		var rp := RacerProgress.new()
 		rp.racer = v
+		# Any parent exposing `input_enabled` is a driver we can gate during the
+		# countdown — MeridianVehicleController (player) or AIDriver (rivals).
 		var p = v.get_parent()
-		if p is MeridianVehicleController:
+		if p != null and "input_enabled" in p:
 			rp.controller = p
 		# With a full checkpoint ring the first gate to hit is index 1 (0 is the
 		# start/finish behind the grid). With a single gate, expect index 0.
@@ -184,16 +186,37 @@ func _check_finished() -> void:
 func get_racer_count() -> int:
 	return _racers.size()
 
-## 1-based live position of a racer (1 = leading). Progress = laps then gates passed.
+## 1-based live position of a racer (1 = leading). Progress = laps then gates
+## passed, with distance-to-next-gate breaking ties between racers in the same
+## sector — otherwise two cars between the same gates would rank arbitrarily.
 func get_position(racer: Node3D) -> int:
 	var me := _find_racer(racer)
 	if me == null:
 		return 0
 	var ahead := 1
 	for rp in _racers:
-		if rp != me and _progress(rp) > _progress(me):
+		if rp != me and _is_ahead(rp, me):
 			ahead += 1
 	return ahead
+
+## True if [param a] is ahead of [param b] in the running order.
+func _is_ahead(a: RacerProgress, b: RacerProgress) -> bool:
+	if a.finished or b.finished:
+		if a.finished and b.finished:
+			return a.finish_time < b.finish_time
+		return a.finished
+	var pa := _progress(a)
+	var pb := _progress(b)
+	if not is_equal_approx(pa, pb):
+		return pa > pb
+	return _distance_to_next(a) < _distance_to_next(b)
+
+## Metres from a racer to the gate it must reach next.
+func _distance_to_next(rp: RacerProgress) -> float:
+	if _checkpoints.is_empty() or rp.racer == null:
+		return 0.0
+	var gate := _checkpoints[rp.next_index % _checkpoints.size()]
+	return rp.racer.global_position.distance_to(gate.global_position)
 
 func get_lap(racer: Node3D) -> int:
 	var rp := _find_racer(racer)
