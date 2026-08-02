@@ -1,10 +1,12 @@
 class_name VehicleDefinition
 extends Resource
-## Describes how to assemble one car type: which body model, which wheel model,
-## and where the wheels sit relative to the body.
+## Describes one car body: which model, and where its wheels sit.
+##
+## Wheels are chosen separately — see [WheelDefinition], assigned on the
+## [ModularVehicle] node — so any wheel type fits any body.
 ##
 ## Create one per vehicle type (right-click in the FileSystem →
-## New Resource → VehicleDefinition), point it at your model files, then assign
+## New Resource → VehicleDefinition), point it at your model file, then assign
 ## it to a [ModularVehicle]. Every racer using this definition gets the same car.
 ##
 ## Imported models arrive at arbitrary scale and axis, so body and wheels each
@@ -21,11 +23,6 @@ extends Resource
 ## Imported models are often 100x or 0.01x. Adjust until the body reads as
 ## roughly 4-5 m long against the wheels.
 @export_range(0.001, 10.0, 0.001, "or_greater") var body_scale := 1.0
-
-@export_group("Wheels")
-## Default wheel type for this car. A [ModularVehicle] can override it, so any
-## wheel fits any body.
-@export var wheels : WheelDefinition
 
 @export_group("Axle Geometry")
 ## Distance between the left and right wheel centres, in metres.

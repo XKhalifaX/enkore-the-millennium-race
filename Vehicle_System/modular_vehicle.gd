@@ -25,29 +25,30 @@ extends MeridianVehicle
 			definition.changed.connect(_on_definition_changed)
 		_rebuild()
 
-## Optional wheel type for this car only. Leave empty to use the wheels named by
-## the definition — set it to fit different wheels without a new definition.
-@export var wheels_override : WheelDefinition:
+## Which wheels to fit. Any wheel type works on any body.
+@export var wheels : WheelDefinition:
 	set(value):
-		if wheels_override and wheels_override.changed.is_connected(_on_definition_changed):
-			wheels_override.changed.disconnect(_on_definition_changed)
-		wheels_override = value
-		if wheels_override and not wheels_override.changed.is_connected(_on_definition_changed):
-			wheels_override.changed.connect(_on_definition_changed)
+		if wheels and wheels.changed.is_connected(_on_definition_changed):
+			wheels.changed.disconnect(_on_definition_changed)
+		wheels = value
+		if wheels and not wheels.changed.is_connected(_on_definition_changed):
+			wheels.changed.connect(_on_definition_changed)
 		_rebuild()
 
-## Tick to force a rebuild if the preview ever gets out of sync.
-@export var rebuild_now := false:
-	set(_value):
-		rebuild_now = false
-		_rebuild()
+## Inspector button to force a rebuild if the preview gets out of sync.
+@export_tool_button("Rebuild car") var rebuild_action := _rebuild
 
 ## Nodes this script generated, cleared on every rebuild.
 var _generated : Array[Node] = []
+## Fingerprint of the definition values, polled in-editor so dragging a slider
+## on the resource rebuilds the car even though custom Resources do not reliably
+## announce their own edits.
+var _spec_fingerprint := 0
 
 func _ready() -> void:
 	_rebuild()
 	if Engine.is_editor_hint():
+		_spec_fingerprint = _compute_fingerprint()
 		return
 	# Physics setup needs the wheels to exist first, hence rebuild above.
 	if torque_curve == null:
@@ -61,6 +62,31 @@ func _ready() -> void:
 
 func _on_definition_changed() -> void:
 	_rebuild()
+
+## Editor-only: watch the assigned resources for edits and rebuild on change.
+func _process(_delta: float) -> void:
+	if not Engine.is_editor_hint():
+		return
+	var current := _compute_fingerprint()
+	if current != _spec_fingerprint:
+		_spec_fingerprint = current
+		_rebuild()
+
+func _compute_fingerprint() -> int:
+	var values : Array = []
+	if definition:
+		values.append_array([definition.body_scene, definition.body_offset,
+			definition.body_rotation_degrees, definition.body_scale,
+			definition.front_track, definition.rear_track,
+			definition.front_axle_z, definition.rear_axle_z, definition.axle_height,
+			definition.collision_size, definition.collision_offset,
+			definition.apply_tint, definition.body_tint])
+	var spec := _wheels()
+	if spec:
+		values.append_array([spec.wheel_scene, spec.wheel_scale,
+			spec.wheel_rotation_degrees, spec.wheel_offset,
+			spec.mirror_right_wheels, spec.tire_radius])
+	return values.hash()
 
 # --- Assembly --------------------------------------------------------------
 
@@ -125,11 +151,9 @@ func _add_collision() -> void:
 	col.position = definition.collision_offset
 	_track(col, self)
 
-## The wheel type in use: the per-car override wins over the definition's.
+## The wheel type fitted to this car.
 func _wheels() -> WheelDefinition:
-	if wheels_override:
-		return wheels_override
-	return definition.wheels if definition else null
+	return wheels
 
 ## Builds one raycast wheel: the MeridianWheel, its hub, and the wheel mesh.
 func _add_wheel(wheel_name: String, x: float, z: float, is_right: bool) -> MeridianWheel:
