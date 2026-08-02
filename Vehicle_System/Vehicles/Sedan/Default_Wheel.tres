@@ -1,9 +1,0 @@
-[gd_resource type="Resource" script_class="WheelDefinition" format=3 uid="uid://bklwgy1sed7ra"]
-
-[ext_resource type="Script" uid="uid://blyo8bhh84ssk" path="res://Vehicle_System/wheel_definition.gd" id="1_y2j7x"]
-[ext_resource type="PackedScene" uid="uid://tcsknrsxpaq2" path="res://Vehicle_System/Vehicles/Sedan/Wheel.tscn" id="2_j2rm0"]
-
-[resource]
-script = ExtResource("1_y2j7x")
-wheel_scene = ExtResource("2_j2rm0")
-metadata/_custom_type_script = "uid://blyo8bhh84ssk"

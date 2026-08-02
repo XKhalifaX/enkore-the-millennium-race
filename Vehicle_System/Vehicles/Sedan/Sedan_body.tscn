@@ -1,8 +1,0 @@
-[gd_scene format=3 uid="uid://bi0jq8mxhl263"]
-
-[ext_resource type="PackedScene" uid="uid://c0oyph1nyl0kv" path="res://Vehicle_System/Vehicles/Sedan/Sedan.fbx" id="1_sv8o6"]
-
-[node name="Sedan" unique_id=302067452 instance=ExtResource("1_sv8o6")]
-
-[node name="Plane_021" parent="." index="0" unique_id=1583943003]
-transform = Transform3D(106.02901, 0, 0, 0, -1.2639643e-05, 106.029, 0, -106.029, -1.2639643e-05, 0, 0.59557927, -1.3759154)
