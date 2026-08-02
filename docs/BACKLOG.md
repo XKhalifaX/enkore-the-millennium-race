@@ -31,6 +31,18 @@ and it scales linearly with the cast.
   first. Decide the convention before the cast grows.
 - **Naming + folder convention** so textures auto-resolve next to the model.
 
+**Also in scope — the wider content pipeline:**
+- **Substance Painter → Godot.** Decide the export preset once (which maps, packed
+  or separate, naming) and a matching Godot material setup, so painted assets
+  land correctly without per-asset fiddling.
+- **Sourcing textures.** A known-good shortlist of libraries and a convention for
+  where they live in the repo, so "find a good texture" stops being a search
+  every time.
+- **Assembly, not just import.** Solved for vehicles by `ModularVehicle` +
+  `VehicleDefinition` / `WheelDefinition`: models are dropped into resources and
+  the car assembles itself. The same "definition resource" pattern is the
+  template for track pieces and props.
+
 **Definition of done:** dropping a new vehicle into the game is *one* import with
 materials intact, not a manual reassembly.
 

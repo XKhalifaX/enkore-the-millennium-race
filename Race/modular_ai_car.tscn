@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://Race/ai_driver.gd" id="1_ai"]
+[ext_resource type="Script" path="res://Vehicle_System/modular_vehicle.gd" id="2_veh"]
+[ext_resource type="PackedScene" path="res://Vehicle_System/engine_sound.tscn" id="3_snd"]
+[ext_resource type="PackedScene" path="res://Vehicle_System/smoke_effect.tscn" id="4_smoke"]
+
+[node name="ModularAICar" type="Node3D" node_paths=PackedStringArray("vehicle")]
+script = ExtResource("1_ai")
+vehicle = NodePath("Vehicle")
+
+[node name="Vehicle" type="RigidBody3D"]
+script = ExtResource("2_veh")
+
+[node name="EngineSound" parent="Vehicle" node_paths=PackedStringArray("vehicle") instance=ExtResource("3_snd")]
+vehicle = NodePath("..")
+
+[node name="Smoke" parent="Vehicle" node_paths=PackedStringArray("vehicle") instance=ExtResource("4_smoke")]
+vehicle = NodePath("..")
