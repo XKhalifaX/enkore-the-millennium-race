@@ -81,11 +81,26 @@ func _build_ui() -> void:
 	_center.visible = false
 	root.add_child(_center)
 
+## Finds the car the HUD reports on. Tree order is NOT reliable once AI cars
+## exist, so prefer the vehicle that is actually driven by input: the player's
+## car sits under a MeridianVehicleController, rivals under an AIDriver.
 func _find_player() -> Node3D:
 	var p := get_tree().get_first_node_in_group("player") as Node3D
 	if p:
 		return p
+	var driven := _input_driven_vehicle(get_tree().root)
+	if driven:
+		return driven
 	return _first_vehicle(get_tree().root)
+
+func _input_driven_vehicle(node: Node) -> Node3D:
+	if node is MeridianVehicle and node.get_parent() is MeridianVehicleController:
+		return node as Node3D
+	for child in node.get_children():
+		var r := _input_driven_vehicle(child)
+		if r:
+			return r
+	return null
 
 func _first_vehicle(node: Node) -> Node3D:
 	if node is MeridianVehicle:
