@@ -99,14 +99,23 @@ func _rebuild() -> void:
 
 	_add_body()
 	_add_collision()
-	front_left_wheel = _add_wheel("WheelFrontLeft", -definition.front_track * 0.5,
+	var fl := _add_wheel("WheelFrontLeft", -definition.front_track * 0.5,
 		definition.front_axle_z, false)
-	front_right_wheel = _add_wheel("WheelFrontRight", definition.front_track * 0.5,
+	var fr := _add_wheel("WheelFrontRight", definition.front_track * 0.5,
 		definition.front_axle_z, true)
-	rear_left_wheel = _add_wheel("WheelRearLeft", -definition.rear_track * 0.5,
+	var rl := _add_wheel("WheelRearLeft", -definition.rear_track * 0.5,
 		definition.rear_axle_z, false)
-	rear_right_wheel = _add_wheel("WheelRearRight", definition.rear_track * 0.5,
+	var rr := _add_wheel("WheelRearRight", definition.rear_track * 0.5,
 		definition.rear_axle_z, true)
+
+	# Only wire the exported wheel slots at runtime. In the editor they would be
+	# serialized into the .tscn as paths to generated nodes that do not exist on
+	# load, producing "node not found" errors on every open.
+	if not Engine.is_editor_hint():
+		front_left_wheel = fl
+		front_right_wheel = fr
+		rear_left_wheel = rl
+		rear_right_wheel = rr
 
 func _clear_generated() -> void:
 	for node in _generated:
