@@ -31,3 +31,6 @@ Desktop.ini
 
 # Godot editor temp files (written while saving scenes)
 *.tmp
+
+# Godot native-lib temp copies
+addons/terrain_3d/bin/~*
