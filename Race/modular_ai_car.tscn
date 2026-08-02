@@ -9,7 +9,7 @@
 script = ExtResource("1_ai")
 vehicle = NodePath("Vehicle")
 
-[node name="Vehicle" type="RigidBody3D"]
+[node name="Vehicle" type="RigidBody3D" parent="."]
 script = ExtResource("2_veh")
 
 [node name="EngineSound" parent="Vehicle" node_paths=PackedStringArray("vehicle") instance=ExtResource("3_snd")]
