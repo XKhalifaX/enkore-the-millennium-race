@@ -1,145 +1,141 @@
-# [Working Title] — Technical Document
+# Enkore — Technical
 
-> Status: **Draft v0.1** — living document. Scoped to **Iteration 1** (feel + race), with a forward-looking data model so later iterations don't require rewrites.
-> Companion to [VISION.md](VISION.md). Last updated: 2026-07-31
-
----
-
-## 1. Engine & stack
-
-- **Engine:** Godot 4.6
-- **Languages:** C# (game logic/systems) + GDScript (vehicle physics — the existing rig is GDScript, keep it)
-- **Physics:** Jolt Physics (already the project default)
-- **Render:** Forward+ / D3D12
-- **Addons in use:** Terrain3D, Sky3D (available for the arena; may or may not be needed if the arena is more built/enclosed than open terrain)
+> Status: **v0.2 — rewritten 2026-08-02** to describe what is actually built,
+> not what was once planned. Companion to [VISION.md](VISION.md) and
+> [BACKLOG.md](BACKLOG.md).
 
 ---
 
-## 2. What we reuse vs. cut
+## 1. Stack
 
-### Reuse (the salvage)
-- **`Systems/Vehicle_System/` — the whole simcade rig is the crown jewel.**
-  - `vehicle.gd` (`MeridianVehicle`, RigidBody3D), `wheel.gd` (`MeridianWheel`), `cam.gd` (chase camera), `engine_sound.gd`, `wheel_smoke.gd`, `gui.gd`, `debug*.gd`.
-  - **Re-tune toward arcade feel** (more grip forgiveness, snappier response, less punishing slip) rather than rewrite. Keep the raycast-wheel model.
-- **Sky3D / Terrain3D / water shaders** — available for arena dressing.
-
-### Cut (belongs to the dead sandbox direction)
-- `Systems/Player_Sys/` (on-foot movement, stats, equip, interactor) — the player *is* the car now.
-- `Systems/Item_System/` (inventory, items, weapon defs) — not needed for the racer.
-- `Systems/NPC_System/` (Ped_Manager, NPC_Controller) — replaced by AI *drivers*.
-- `Systems/World_Sys/IInteractable.cs`, `Gas_Station/`, on-foot `player.tscn`.
-- **`vehicle_Interactable.cs` (enter/exit vehicle)** — in a pure racer the player controls the car directly; no walk-up-and-enter. Cut for iteration 1.
-
-### Repurpose
-- **`PlayerState.cs` → a lightweight race state** (`Countdown`, `Racing`, `Finished`, `Wrecked`, `Spectating`). Much of the old machine collapses; keep the pattern, drop the on-foot modes.
+- **Engine:** Godot 4.6 · **Physics:** Jolt · **Render:** Forward+ / D3D12
+- **Language:** GDScript. No C# solution exists — see [BACKLOG.md](BACKLOG.md) §7.
+- **Addons present:** Terrain3D, Sky3D, gevp (the vehicle rig originates here).
 
 ---
 
-## 3. Core architectural decision: decouple input from the vehicle
+## 2. What exists today
 
-The single most important refactor. Right now the vehicle reads input directly. To let **player and AI share the exact same car**, the vehicle must not know *who* is driving.
+Everything below is built, in the repo, and working unless noted.
 
-- **`MeridianVehicle`** exposes a control surface, e.g.:
-  `set_control_input(throttle: float, brake: float, steer: float, handbrake: bool)`
-  and stops reading `Input` itself.
-- **Controllers** feed it each physics frame:
-  - **`PlayerDriver`** — reads keyboard/gamepad → calls `set_control_input`.
-  - **`AIDriver`** — computes desired throttle/steer from the racing line → calls `set_control_input`.
-- Payoff: one vehicle, two brains, identical physics. Rivals feel fair because they *are* running your car model. This also makes "rivals double as playable characters" (Vision §5) almost free.
+### Vehicle rig — `Game/VehicleRig/`
+The salvaged simcade rig, the oldest and most valuable code in the project.
+- `vehicle.gd` (`MeridianVehicle`, RigidBody3D) — brush tire model, raycast
+  wheels, ABS, traction control, locking differentials, torque vectoring,
+  aerodynamic drag, stability assists, automatic/manual gearbox. Fully
+  data-driven through exported properties.
+- `wheel.gd` (`MeridianWheel`) — per-wheel suspension, slip and grip; reads
+  surface type from the collider's **node group** (`Road`, `Dirt`, `Grass`).
+- `cam.gd` chase camera · `engine_sound.gd` · `wheel_smoke.gd` ·
+  `gui.gd` (speed/RPM/gear) · `debug.gd` + `debug_ui.gd` (force/slip overlays).
+- `vehicle_controllergd.gd` (`MeridianVehicleController`) — reads player input.
+- `simcade_car.tscn` — the original hand-built car. `vehicle_sys_test.tscn` —
+  the player car assembly (car + camera + HUD + tuning panel).
+
+### Live tuning panel — `Game/VehicleRig/tuning_panel.gd`
+Runtime, mouse-driven slider panel (**F1**) wired straight to the vehicle, so
+handling is tuned while driving. 17 live parameters across steering, throttle/
+brakes, grip, stability and aero. Six presets (Default/Muscle/Sedan/Formula
+One/Truck/SUV). **Copy** prints and clipboards the current values so a good
+setup can be baked in. Grip changes are pushed into each wheel's live cache.
+
+### Modular vehicle assembler — `Game/Modular/`
+Data-driven car construction: new vehicles are a resource setup, not a
+hand-built scene.
+- `vehicle_definition.gd` (`VehicleDefinition`) — body model, body transform,
+  axle geometry (track, axle Z, ride height), chassis collider, name/tint.
+- `wheel_definition.gd` (`WheelDefinition`) — wheel model, scale/rotation/
+  offset, mirroring, tyre radius. Separate resource, so **any wheel fits any
+  body**.
+- `modular_vehicle.gd` (`ModularVehicle`, `@tool`) — builds body, collider and
+  four raycast wheels from those resources, then runs the normal physics init.
+  Rebuilds live in the editor while sliders are dragged, so wheel placement is
+  done by eye. Generated nodes are never saved into the scene.
+
+### Race systems — `Game/Racing/`
+- `race_manager.gd` (`RaceManager`) — grid spawn → countdown → race → finish.
+  Tracks per-racer checkpoint index and lap count; **live position** sorts by
+  laps, then gates cleared, then distance to the next gate. Finish order and
+  times recorded. Discovers everything by convention (see §3).
+- `checkpoint.gd/.tscn` (`Checkpoint`) — ordered Area3D gates. Must be crossed
+  in sequence, which is what prevents corner-cutting; the first gate doubles as
+  start/finish and validates a lap.
+- `race_hud.gd` (`RaceHUD`) — countdown, live lap/position/time, finish screen,
+  **R** to restart. Identifies the player as the car driven by the input
+  controller (not by scene order).
+
+### AI — `Game/AI/`
+- `ai_driver.gd` (`AIDriver`) — writes the **same input fields** the player's
+  controller writes, so rivals run identical physics. Steers toward a
+  speed-scaled look-ahead point, eases off for bends it can see coming, nudges
+  around cars directly ahead, reverses out when stuck. Per-car `skill`,
+  `max_speed_kmh`, `corner_sensitivity`.
+- **Racing line is generated automatically** as a closed Catmull-Rom spline
+  through the checkpoints in placement order — no Path3D authoring needed. A
+  hand-made `RacingLine` Path3D still takes priority if one exists.
+- `ai_car.tscn` (fixed rig) · `modular_ai_car.tscn` (uses `ModularVehicle`).
+
+### Content & scenes
+- `Scenes/Prototype_Race.tscn` — the working arena: PSX arena mesh, road
+  blockout, jump pad, checkpoints, grid, race systems, player + AI rivals.
+- `Scenes/test_track_figure8.tscn` — generated figure-8 test track.
+  `Tools/gen_figure8.py` regenerates it parametrically.
+- Input map: WASD/arrows, Space handbrake, Shift clutch, E/Q shift, T gearbox
+  toggle. **Keyboard only** — no gamepad yet ([BACKLOG.md](BACKLOG.md) §5).
+
+### Infrastructure
+Private GitHub repo with Git LFS for binaries; GitHub Projects board with
+milestones per iteration. No CI (removed deliberately — overhead outweighed
+value for a solo dev; restorable from history).
 
 ---
 
-## 4. Iteration 1 — system breakdown
+## 3. Architecture principles
 
-**Goal:** prove the driving + racing is fun. One arena, one player car, N AI rivals, one race. No roguelike, no upgrades, no destruction.
+Three rules that the code already follows and should keep following.
 
-### 4.1 Arena (`The Millennium Tournament`)
-- One environment scene containing: the drivable circuit geometry, a **start/finish line**, an ordered set of **checkpoint gates**, and a **starting grid** of spawn points.
-- Collision + (if AI uses navigation) a racing-line path. Recommend a hand-placed **racing-line Path3D** for AI in iter 1 — simplest, most controllable.
+**1. Input is decoupled from the vehicle.** The vehicle never reads `Input`; it
+exposes `throttle_input` / `steering_input` / `brake_input` / `handbrake_input`
+/ `clutch_input`, and a *driver* writes them each physics frame — either
+`MeridianVehicleController` (player) or `AIDriver` (rival). One car, two brains,
+identical physics. Any node exposing `input_enabled` can be gated by the
+`RaceManager` during the countdown.
 
-### 4.2 Arcade vehicle
-- Reused rig, arcade-tuned. Expose the control surface (§3).
-- Handling profile stored as data (see §5) so different cars/characters can feel different later without code changes.
+**2. Content is data, not scenes.** Vehicles are `VehicleDefinition` +
+`WheelDefinition` resources assembled by `ModularVehicle`. New cars should never
+require new hand-built scenes. Extend this pattern to other content.
 
-### 4.3 Race manager (`RaceManager`, C#)
-- Owns race lifecycle: **grid spawn → countdown → GO → racing → finish → standings**.
-- Tracks each racer's progress: `currentCheckpointIndex`, `lapCount`, and distance-to-next-checkpoint.
-- **Live position** = sort racers by `(lapCount desc, checkpointIndex desc, distanceToNextCheckpoint asc)`.
-- Detects race completion (target lap count) → emits finish → win/lose result.
-
-### 4.4 Checkpoints (`Checkpoint`, Area3D)
-- Ordered gates. A racer must pass them in sequence; the last one before start/finish validates a lap. Prevents corner-cutting and drives the position sort.
-
-### 4.5 Rival AI (`AIDriver`)
-- Iteration-1 simplicity: follow the **racing-line Path3D**, steer toward a look-ahead point, throttle based on upcoming curvature (slow for corners), basic collision nudging.
-- Keep AI **uniform** for iter 1 (the weighted "character rivals" with unique threat behavior are Iteration 4). A field of competent-but-plain AI is enough to answer "is racing fun?"
-- Light rubber-banding optional, off by default until we playtest.
-
-### 4.6 Camera
-- Reuse `cam.gd` chase cam; tune follow distance/damping for arcade readability.
-
-### 4.7 HUD (`RaceHUD`, CanvasLayer)
-- Position (e.g. 3/8), current lap (2/3), lap time, speed. Built in code like the old status UIs, or a `.tscn` — either is fine.
-
-### 4.8 Flow
-- Simple: race scene loads → countdown → race → results overlay → **restart**. No menus needed for iter 1 (menu/car-select is a later iteration).
-
-### Definition of Done (Iteration 1)
-- [ ] Player drives an arcade-tuned car in the arena with satisfying feel.
-- [ ] N AI rivals complete the circuit and compete for position.
-- [ ] Countdown start, lap + checkpoint tracking, live positions, finish + final standings.
-- [ ] HUD shows position / lap / time / speed.
-- [ ] Results screen → restart.
-- [ ] **The honest gut-check: is it fun to replay this one race?** If no, iterate the *feel* before adding anything.
+**3. Systems discover their world by convention.** `RaceManager` finds gates
+under a node named `Checkpoints`, spawns under `Grid`, and treats any
+`MeridianVehicle` in the tree as a racer; `AIDriver` builds its line from those
+same gates. Placing content requires no wiring.
 
 ---
 
-## 5. Forward-looking data model (build once, don't repaint)
-
-Use **Godot Resources** (the old `ItemDefinition` pattern was clean — reuse the approach) so everything is data-driven and inspector-editable. Define the shells now even if later iterations fill them in.
-
-- **`VehicleTuning` (Resource)** — handling profile (grip, throttle response, brake force, steering, mass feel). Lets each car/character drive differently without code. *Used in iter 1.*
-- **`CharacterDefinition` (Resource)** — id, display name, visuals/model ref, `VehicleTuning` ref, and (later) a `SignatureAbility` ref. *Iter 1 can use one minimal instance.*
-- **`SignatureAbility` (Resource, base class)** — the "cursed technique" hook. *Stub only in iter 1.* (Iteration 3.)
-- **`UpgradeDefinition` (Resource)** — a drafted run upgrade; must define an *effect*, not just a stat number (Vision Commandment 1). *Stub only.* (Iteration 3.)
-- **`RunState` (runtime object)** — current character, drafted upgrades, tournament round, power scaling. *Not built in iter 1.* (Iteration 3.)
-
-Designing `CharacterDefinition` + `VehicleTuning` now means the roguelike/character layers later plug in without touching the vehicle or race code.
-
----
-
-## 6. Suggested folder structure (you own final organization)
-
-A clean split of *new game code* from *reused rig* and *content*:
+## 4. Project layout
 
 ```
-res://
-  Game/
-    Vehicle/      # arcade vehicle wrapper + control surface (wraps the reused rig)
-    Racing/       # RaceManager, Checkpoint, standings/position logic
-    AI/           # AIDriver
-    Player/       # PlayerDriver (input -> vehicle)
-    Camera/       # chase cam
-    UI/           # RaceHUD, results screen
-    State/        # race state machine (repurposed PlayerState)
-    Data/         # VehicleTuning, CharacterDefinition, (stubs) SignatureAbility, UpgradeDefinition
-  Arena/          # The Millennium Tournament scene, geometry, racing-line Path3D, checkpoints, grid
-  Vehicles/       # your ready-made vehicle models + scenes
-  Characters/     # character definitions + visuals
-  docs/           # VISION.md, TECHNICAL.md
-  _legacy/        # (optional) park the cut sandbox systems here instead of deleting, until sure
+Art/     Models/{Arena,Vehicles}, Textures, Shaders    content
+Game/    VehicleRig, Modular, Racing, AI               code
+Data/    Vehicles/*.tres                               definitions
+Scenes/  Prototype_Race, test_track_figure8            playable scenes
+Tools/   gen_figure8.py                                dev scripts
+addons/  docs/                                         third-party · docs
 ```
-
-> Tip: move the cut sandbox systems into `_legacy/` rather than deleting outright — cheap insurance while the pivot settles. Delete once iteration 1 proves out.
 
 ---
 
-## 7. Iteration roadmap (from VISION §9, technical framing)
+## 5. Iterations ahead
 
-1. **Iter 1 — Feel + race** *(this doc's focus)*: drive, rivals, one race, standings.
-2. **Iter 2 — Weight & carnage**: two-way damage, wreck states, destruction feedback, weighted-rival presence.
-3. **Iter 3 — The run**: `SignatureAbility` + `UpgradeDefinition` draft + `RunState` power curve.
-4. **Iter 4+ — Tournament & cast**: phase-based round objectives, meta-progression, multiple characters, the overlord/host.
+Named, not designed. Detail is added when the iteration starts.
 
-Each iteration ends with a playtest and the same question: *is it more fun than before?*
-```
+- **2 — Weight & Carnage.** Damage and destruction. The one architectural note
+  worth recording now: damage must be **two-way** (the player is breakable too),
+  and it has to run on the existing shared-physics rig so player and AI take
+  damage by the same rules.
+- **3 — Progression.** Things that build up and carry forward. Whatever form it
+  takes, it plugs into `VehicleDefinition`/`WheelDefinition` and the driver
+  control surface rather than modifying the vehicle rig.
+- **4 — Cast & Tournament.** Content: racer models, vehicles, the tournament
+  holder. Blocked less by code than by the art pipeline
+  ([BACKLOG.md](BACKLOG.md) §1).
