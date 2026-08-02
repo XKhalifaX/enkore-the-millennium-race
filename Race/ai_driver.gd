@@ -8,17 +8,30 @@ extends Node3D
 ## and it steers toward a look-ahead point on the racing line, easing off for
 ## corners it can see coming.
 ##
-## Setup: put a [Path3D] named "RacingLine" in the scene (a closed loop following
-## the track), or assign [member racing_line] directly.
+## Setup: nothing. By default the driver builds its own smooth racing line
+## through the existing Checkpoint gates (a Catmull-Rom spline through the
+## children of the "Checkpoints" node, in the order you placed them), so the
+## track needs no extra authoring.
+##
+## Optional: assign [member racing_line] (or add a [Path3D] named "RacingLine")
+## to hand-author a better line — it takes priority over the generated one.
 ##
 ## Exposes `input_enabled` so RaceManager can hold it on the grid during the
 ## countdown, exactly like the player's controller.
 
 @export var vehicle : MeridianVehicle
-## Optional. Defaults to a Path3D named "RacingLine" found anywhere in the scene.
+## Optional hand-authored line. Defaults to a Path3D named "RacingLine" if one
+## exists; otherwise the line is generated from the checkpoints.
 @export var racing_line : Path3D
 ## When false the driver releases all controls (used during the countdown).
 @export var input_enabled := true
+
+@export_group("Racing Line")
+## Generate the line from the Checkpoint gates when no Path3D is supplied.
+@export var auto_line_from_checkpoints := true
+## Corner rounding of the generated line. 0 = straight between gates (cuts
+## corners), 1 = full Catmull-Rom curve. Raise it if the AI clips walls.
+@export_range(0.0, 2.0) var line_smoothing := 1.0
 
 @export_group("Pace")
 ## Flat-out target speed on straights.
@@ -59,6 +72,8 @@ const BEND_PROBE := 14.0
 
 var _curve : Curve3D
 var _length := 0.0
+## Curve-space -> world. Identity for a generated line (already world-space).
+var _line_xform := Transform3D.IDENTITY
 var _others : Array[MeridianVehicle] = []
 var _stuck_timer := 0.0
 var _reverse_timer := 0.0
@@ -68,15 +83,51 @@ func _ready() -> void:
 		vehicle = _first_vehicle(self)
 	if racing_line == null:
 		racing_line = _find_by_name(get_tree().root, "RacingLine") as Path3D
-	if racing_line:
+
+	# A hand-authored Path3D wins; otherwise build a line through the gates.
+	if racing_line and racing_line.curve and racing_line.curve.point_count > 1:
 		_curve = racing_line.curve
-		if _curve:
-			_length = _curve.get_baked_length()
+		_line_xform = racing_line.global_transform
+	elif auto_line_from_checkpoints:
+		_curve = _build_line_from_checkpoints()
+		_line_xform = Transform3D.IDENTITY
+	if _curve:
+		_length = _curve.get_baked_length()
+
 	if vehicle == null:
 		push_warning("AIDriver: no MeridianVehicle found under %s." % name)
 	if _curve == null or _length <= 0.0:
-		push_warning("AIDriver: no racing line. Add a Path3D named 'RacingLine' to the scene.")
+		push_warning("AIDriver: no racing line — need 3+ gates under a 'Checkpoints' node, or a 'RacingLine' Path3D.")
 	_gather_others()
+
+## Builds a closed, smooth loop through the Checkpoint gates in placement order.
+## Uses Catmull-Rom tangents converted to Bezier handles, so the AI arcs through
+## corners instead of driving gate-to-gate in straight lines.
+func _build_line_from_checkpoints() -> Curve3D:
+	var holder := _find_by_name(get_tree().root, "Checkpoints")
+	if holder == null:
+		return null
+	var points : Array[Vector3] = []
+	for c in holder.get_children():
+		if c is Checkpoint:
+			points.append((c as Checkpoint).global_position)
+	var n := points.size()
+	if n < 3:
+		return null
+
+	var handles : Array[Vector3] = []
+	for i in n:
+		var prev : Vector3 = points[(i - 1 + n) % n]
+		var next : Vector3 = points[(i + 1) % n]
+		# Catmull-Rom tangent m = (next - prev) / 2; Bezier handle = m / 3.
+		handles.append((next - prev) * (line_smoothing / 6.0))
+
+	var curve := Curve3D.new()
+	for i in n:
+		curve.add_point(points[i], -handles[i], handles[i])
+	# Close the loop so sampling wraps continuously back to the first gate.
+	curve.add_point(points[0], -handles[0], handles[0])
+	return curve
 
 func _physics_process(delta: float) -> void:
 	if vehicle == null:
@@ -190,13 +241,13 @@ func _release_controls() -> void:
 
 ## Distance along the line closest to a world position.
 func _offset_at(world_pos: Vector3) -> float:
-	var local : Vector3 = racing_line.global_transform.affine_inverse() * world_pos
+	var local : Vector3 = _line_xform.affine_inverse() * world_pos
 	return _curve.get_closest_offset(local)
 
 ## World-space point at a distance along the line, wrapping around the loop.
 func _point_at(offset: float) -> Vector3:
 	var o := fposmod(offset, _length)
-	return racing_line.global_transform * _curve.sample_baked(o)
+	return _line_xform * _curve.sample_baked(o)
 
 # --- Discovery -------------------------------------------------------------
 
