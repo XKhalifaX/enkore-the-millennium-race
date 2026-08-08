@@ -46,6 +46,9 @@ extends Resource
 ## heavy, low-slung, all-wheel-drive with long suspension so it doesn't wheelie.
 ## Off = keep whatever is set on the Vehicle node.
 @export var override_chassis := false
+## Pick an archetype (mass/COG/drive/suspension tuned as a set) or Custom to use
+## the manual values below. Suspension travel auto-scales to the wheel size.
+@export var chassis_preset: ChassisPresets.Preset = ChassisPresets.Preset.CUSTOM
 @export var mass := 1500.0
 ## Lowers the centre of gravity. More negative = harder to tip or wheelie.
 @export_range(-2.0, 1.0, 0.05) var cog_height_offset := -0.2

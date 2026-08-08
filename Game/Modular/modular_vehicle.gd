@@ -43,6 +43,13 @@ extends MeridianVehicle
 		show_collision_preview = value
 		_rebuild()
 
+## Draw editor-only setup gizmos: centre of mass (orange), driven wheels (green),
+## suspension travel (cyan), wheelbase and ground line. Never shown in-game.
+@export var show_setup_gizmos := true:
+	set(value):
+		show_setup_gizmos = value
+		_rebuild()
+
 ## Inspector button to force a rebuild if the preview gets out of sync.
 @export_tool_button("Rebuild car") var rebuild_action := _rebuild
 
@@ -71,15 +78,144 @@ func _ready() -> void:
 	# average_drive_wheel_radius, which init computes.
 	if definition:
 		if definition.override_chassis:
-			vehicle_mass = definition.mass
-			center_of_gravity_height_offset = definition.cog_height_offset
-			front_weight_distribution = definition.front_weight_distribution
-			front_torque_split = definition.front_torque_split
-			front_spring_length = definition.front_spring_length
-			rear_spring_length = definition.rear_spring_length
+			var ch := _resolve_chassis()
+			vehicle_mass = ch["mass"]
+			center_of_gravity_height_offset = ch["cog"]
+			front_weight_distribution = ch["weight"]
+			front_torque_split = ch["split"]
+			front_spring_length = ch["front_spring"]
+			rear_spring_length = ch["rear_spring"]
 		HandlingPresets.apply(self, definition.handling_preset)
 	super()
 	_apply_gearbox_from_definition()
+
+## The chassis values in effect: the archetype preset, the definition's manual
+## values, or (when not overriding) the vehicle's own. Used by both the physics
+## setup and the setup gizmos so they always agree.
+func _resolve_chassis() -> Dictionary:
+	var out := {
+		"mass": vehicle_mass, "cog": center_of_gravity_height_offset,
+		"weight": front_weight_distribution, "split": front_torque_split,
+		"front_spring": front_spring_length, "rear_spring": rear_spring_length,
+	}
+	if definition == null or not definition.override_chassis:
+		return out
+	if definition.chassis_preset == ChassisPresets.Preset.CUSTOM:
+		out["mass"] = definition.mass
+		out["cog"] = definition.cog_height_offset
+		out["weight"] = definition.front_weight_distribution
+		out["split"] = definition.front_torque_split
+		out["front_spring"] = definition.front_spring_length
+		out["rear_spring"] = definition.rear_spring_length
+	else:
+		var c := ChassisPresets.values(definition.chassis_preset)
+		out["mass"] = c["mass"]
+		out["cog"] = c["cog"]
+		out["weight"] = c["weight"]
+		out["split"] = c["split"]
+		var travel: float = c["spring_ratio"] * _tyre_radius()
+		out["front_spring"] = travel
+		out["rear_spring"] = travel
+	return out
+
+## Tyre radius from the fitted wheel (works in-editor, where front_tire_radius
+## has not yet been set from the wheel).
+func _tyre_radius() -> float:
+	var spec := _wheels()
+	if spec and spec.tire_radius > 0.0:
+		return spec.tire_radius
+	return front_tire_radius
+
+# --- Setup gizmos (editor-only) --------------------------------------------
+
+## Draws the invisible physics as viewport gizmos so a car can be set up by eye:
+## centre of mass, which wheels are driven, suspension travel, wheelbase, and the
+## ground line. All owner-less (unsaved) and only built in the editor.
+func _add_setup_gizmos() -> void:
+	if definition == null:
+		return
+	var ch := _resolve_chassis()
+	var ay: float = definition.axle_height
+	var fz: float = definition.front_axle_z
+	var rz: float = definition.rear_axle_z
+	var ft: float = definition.front_track * 0.5
+	var rt: float = definition.rear_track * 0.5
+	var radius := _tyre_radius()
+
+	var fl := Vector3(-ft, ay, fz)
+	var fr := Vector3(ft, ay, fz)
+	var rl := Vector3(-rt, ay, rz)
+	var rr := Vector3(rt, ay, rz)
+
+	var im := ImmediateMesh.new()
+	im.surface_begin(Mesh.PRIMITIVE_LINES)
+	# Wheelbase / track rectangle (white).
+	var white := Color(1, 1, 1, 0.8)
+	_line(im, fl, fr, white)
+	_line(im, fr, rr, white)
+	_line(im, rr, rl, white)
+	_line(im, rl, fl, white)
+	# Suspension travel: down from each wheel by its spring length (cyan).
+	var cyan := Color(0.3, 0.9, 1.0)
+	_line(im, fl, fl - Vector3(0, ch["front_spring"], 0), cyan)
+	_line(im, fr, fr - Vector3(0, ch["front_spring"], 0), cyan)
+	_line(im, rl, rl - Vector3(0, ch["rear_spring"], 0), cyan)
+	_line(im, rr, rr - Vector3(0, ch["rear_spring"], 0), cyan)
+	# Ground contact line, at the bottom of the tyres (dim yellow).
+	var gy := ay - radius
+	var gx: float = maxf(ft, rt) + 0.5
+	var yellow := Color(1.0, 0.9, 0.3, 0.5)
+	_line(im, Vector3(-gx, gy, fz - 0.5), Vector3(gx, gy, fz - 0.5), yellow)
+	_line(im, Vector3(gx, gy, fz - 0.5), Vector3(gx, gy, rz + 0.5), yellow)
+	_line(im, Vector3(gx, gy, rz + 0.5), Vector3(-gx, gy, rz + 0.5), yellow)
+	_line(im, Vector3(-gx, gy, rz + 0.5), Vector3(-gx, gy, fz - 0.5), yellow)
+	im.surface_end()
+
+	var lines := MeshInstance3D.new()
+	lines.name = "SetupGizmoLines"
+	lines.mesh = im
+	lines.material_override = _gizmo_material(Color.WHITE, true)
+	_track(lines, self)
+
+	# Centre of mass (orange).
+	var cog := Vector3(0, ay + ch["cog"], lerpf(rz, fz, ch["weight"]))
+	_track(_marker(cog, 0.22, Color(1.0, 0.45, 0.1)), self)
+
+	# Driven wheels (green): front driven if split > 0, rear if split < 1.
+	var green := Color(0.25, 1.0, 0.4)
+	var mark := radius * 0.4
+	if ch["split"] > 0.0:
+		_track(_marker(fl, mark, green), self)
+		_track(_marker(fr, mark, green), self)
+	if ch["split"] < 1.0:
+		_track(_marker(rl, mark, green), self)
+		_track(_marker(rr, mark, green), self)
+
+func _line(im: ImmediateMesh, a: Vector3, b: Vector3, c: Color) -> void:
+	im.surface_set_color(c)
+	im.surface_add_vertex(a)
+	im.surface_set_color(c)
+	im.surface_add_vertex(b)
+
+func _marker(pos: Vector3, r: float, col: Color) -> MeshInstance3D:
+	var sphere := SphereMesh.new()
+	sphere.radius = r
+	sphere.height = r * 2.0
+	var mi := MeshInstance3D.new()
+	mi.name = "Gizmo"
+	mi.mesh = sphere
+	mi.position = pos
+	mi.material_override = _gizmo_material(col, false)
+	return mi
+
+func _gizmo_material(col: Color, vertex_colours: bool) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = col
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.no_depth_test = true
+	mat.vertex_color_use_as_albedo = vertex_colours
+	return mat
 
 func _on_definition_changed() -> void:
 	_rebuild()
@@ -118,7 +254,12 @@ func _compute_fingerprint() -> int:
 			definition.front_track, definition.rear_track,
 			definition.front_axle_z, definition.rear_axle_z, definition.axle_height,
 			definition.collision_size, definition.collision_offset,
-			definition.apply_tint, definition.body_tint])
+			definition.apply_tint, definition.body_tint,
+			definition.override_chassis, definition.chassis_preset, definition.mass,
+			definition.cog_height_offset, definition.front_weight_distribution,
+			definition.front_torque_split, definition.front_spring_length,
+			definition.rear_spring_length, definition.handling_preset,
+			definition.gearbox_preset])
 	var spec := _wheels()
 	if spec:
 		values.append_array([spec.wheel_scene, spec.wheel_scale,
@@ -154,6 +295,9 @@ func _rebuild() -> void:
 		front_right_wheel = fr
 		rear_left_wheel = rl
 		rear_right_wheel = rr
+
+	if show_setup_gizmos and Engine.is_editor_hint():
+		_add_setup_gizmos()
 
 func _clear_generated() -> void:
 	for node in _generated:
