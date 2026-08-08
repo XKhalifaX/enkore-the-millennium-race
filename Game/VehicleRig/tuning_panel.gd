@@ -355,12 +355,8 @@ func _tire_radius() -> float:
 func _apply_gearbox() -> void:
 	if vehicle == null or _gear_count < 1 or vehicle.final_drive <= 0.0:
 		return
-	var k : float = (vehicle.max_rpm / RPM_PER_RAD) * _tire_radius() * 3.6
-	var ratios : Array[float] = []
-	for i in _gear_count:
-		var fraction : float = pow(float(i + 1) / float(_gear_count), GEAR_SPACING_EXPONENT)
-		var speed : float = maxf(_top_speed * fraction, 1.0)
-		ratios.append(k / speed / vehicle.final_drive)
+	var ratios := GearboxPresets.compute_ratios(
+		_top_speed, _gear_count, vehicle.max_rpm, _tire_radius(), vehicle.final_drive)
 	vehicle.set_gear_ratios(ratios)
 	_update_gearbox_readout()
 

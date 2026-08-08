@@ -39,6 +39,22 @@ extends Resource
 @export var collision_size := Vector3(1.8, 1.0, 4.4)
 @export var collision_offset := Vector3(0.0, 0.575, 0.152)
 
+@export_group("Gearbox")
+## How this car's automatic gearbox is geared. "Scene default" keeps whatever
+## ratios the vehicle already has; the presets and Custom recompute the ratios
+## to suit a top speed and gear count (same options as the F1 tuning panel).
+@export var gearbox_preset: GearboxPresets.Preset = GearboxPresets.Preset.SCENE_DEFAULT
+## Number of gears, used when Gearbox Preset is Custom.
+@export_range(3, 8, 1, "or_greater") var custom_gear_count := 5
+## Top speed the gearbox is spread across, used when Gearbox Preset is Custom.
+@export_range(60.0, 300.0, 5.0) var custom_top_speed_kmh := 160.0
+## Override the shift feel too (else the vehicle's own values are kept).
+@export var override_shift_feel := false
+## Minimum seconds between automatic shifts (anti-hunting). Applied if overriding.
+@export_range(0.0, 2.0, 0.05) var shift_cooldown := 0.5
+## Downshift when the lower gear would sit under this fraction of redline.
+@export_range(0.3, 0.95, 0.01) var downshift_point := 0.75
+
 @export_group("Identity")
 ## Shown in menus/standings later. Also handy for telling rivals apart.
 @export var display_name := "Racer"

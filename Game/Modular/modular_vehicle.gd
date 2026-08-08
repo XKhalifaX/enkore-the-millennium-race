@@ -67,9 +67,27 @@ func _ready() -> void:
 		front_tire_radius = spec.tire_radius
 		rear_tire_radius = spec.tire_radius
 	super()
+	_apply_gearbox_from_definition()
 
 func _on_definition_changed() -> void:
 	_rebuild()
+
+## Applies the definition's gearbox choice once the physics rig is initialised
+## (average_drive_wheel_radius is only valid after super()).
+func _apply_gearbox_from_definition() -> void:
+	if definition == null:
+		return
+	var radius := average_drive_wheel_radius
+	if radius <= 0.0:
+		radius = front_tire_radius
+	var ratios := GearboxPresets.ratios_for(definition.gearbox_preset,
+		definition.custom_gear_count, definition.custom_top_speed_kmh,
+		max_rpm, radius, final_drive)
+	if not ratios.is_empty():
+		set_gear_ratios(ratios)
+	if definition.override_shift_feel:
+		automatic_time_between_shifts = definition.shift_cooldown
+		automatic_downshift_ratio = definition.downshift_point
 
 ## Editor-only: watch the assigned resources for edits and rebuild on change.
 func _process(_delta: float) -> void:
