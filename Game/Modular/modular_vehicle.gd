@@ -85,6 +85,12 @@ func _ready() -> void:
 			front_torque_split = ch["split"]
 			front_spring_length = ch["front_spring"]
 			rear_spring_length = ch["rear_spring"]
+			front_wheel_mass = ch["wheel_mass"]
+			rear_wheel_mass = ch["wheel_mass"]
+			front_resting_ratio = ch["resting"]
+			rear_resting_ratio = ch["resting"]
+			front_damping_ratio = ch["damping"]
+			rear_damping_ratio = ch["damping"]
 		HandlingPresets.apply(self, definition.handling_preset)
 	super()
 	_apply_gearbox_from_definition()
@@ -97,6 +103,8 @@ func _resolve_chassis() -> Dictionary:
 		"mass": vehicle_mass, "cog": center_of_gravity_height_offset,
 		"weight": front_weight_distribution, "split": front_torque_split,
 		"front_spring": front_spring_length, "rear_spring": rear_spring_length,
+		"wheel_mass": front_wheel_mass, "resting": front_resting_ratio,
+		"damping": front_damping_ratio,
 	}
 	if definition == null or not definition.override_chassis:
 		return out
@@ -116,6 +124,9 @@ func _resolve_chassis() -> Dictionary:
 		var travel: float = c["spring_ratio"] * _tyre_radius()
 		out["front_spring"] = travel
 		out["rear_spring"] = travel
+		out["wheel_mass"] = c["wheel_mass"]
+		out["resting"] = c["resting"]
+		out["damping"] = c["damping"]
 	return out
 
 ## Tyre radius from the fitted wheel (works in-editor, where front_tire_radius
@@ -161,6 +172,11 @@ func _add_setup_gizmos() -> void:
 	_line(im, fr, fr - Vector3(0, ch["front_spring"], 0), cyan)
 	_line(im, rl, rl - Vector3(0, ch["rear_spring"], 0), cyan)
 	_line(im, rr, rr - Vector3(0, ch["rear_spring"], 0), cyan)
+	# Physical tyre radius as a circle at each wheel (magenta), so it can be
+	# matched to the visual wheel mesh — a mismatch is what sinks or floats it.
+	var magenta := Color(1.0, 0.3, 0.9)
+	for w in [fl, fr, rl, rr]:
+		_circle(im, w, radius, magenta)
 	# Ground contact line, at the bottom of the tyres (dim yellow).
 	var gy := ay - radius
 	var gx: float = maxf(ft, rt) + 0.5
@@ -196,6 +212,16 @@ func _line(im: ImmediateMesh, a: Vector3, b: Vector3, c: Color) -> void:
 	im.surface_add_vertex(a)
 	im.surface_set_color(c)
 	im.surface_add_vertex(b)
+
+## A vertical circle (in the wheel's rolling plane) showing the physical radius.
+func _circle(im: ImmediateMesh, centre: Vector3, r: float, c: Color) -> void:
+	var segments := 24
+	var prev := centre + Vector3(0, r, 0)
+	for i in range(1, segments + 1):
+		var a := TAU * i / segments
+		var p := centre + Vector3(0, cos(a) * r, sin(a) * r)
+		_line(im, prev, p, c)
+		prev = p
 
 func _marker(pos: Vector3, r: float, col: Color) -> MeshInstance3D:
 	var sphere := SphereMesh.new()

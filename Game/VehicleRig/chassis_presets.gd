@@ -22,14 +22,16 @@ const NAMES := {
 }
 
 ## mass(kg) · cog(height offset) · weight(front distribution) · split(0=RWD,1=FWD,
-## 0.5=AWD) · spring_ratio(spring length / tyre radius)
+## 0.5=AWD) · spring_ratio(spring length / tyre radius) · wheel_mass(kg, per wheel
+## — heavy wheels stop big-wheeled cars bouncing) · resting(rest compression;
+## lower = stiffer) · damping(0.2 soft .. 0.6 tight).
 const DATA := {
-	Preset.LIGHT_CAR:     {"mass": 950.0,  "cog": -0.15, "weight": 0.58, "split": 1.0, "spring_ratio": 0.45},
-	Preset.SEDAN:         {"mass": 1500.0, "cog": -0.20, "weight": 0.52, "split": 0.0, "spring_ratio": 0.50},
-	Preset.SPORTS:        {"mass": 1300.0, "cog": -0.28, "weight": 0.47, "split": 0.0, "spring_ratio": 0.40},
-	Preset.SUV:           {"mass": 2200.0, "cog": -0.10, "weight": 0.55, "split": 0.4, "spring_ratio": 0.60},
-	Preset.PICKUP:        {"mass": 2500.0, "cog": -0.08, "weight": 0.57, "split": 0.2, "spring_ratio": 0.60},
-	Preset.MONSTER_TRUCK: {"mass": 4800.0, "cog": -0.60, "weight": 0.50, "split": 0.5, "spring_ratio": 0.78},
+	Preset.LIGHT_CAR:     {"mass": 950.0,  "cog": -0.15, "weight": 0.58, "split": 1.0, "spring_ratio": 0.45, "wheel_mass": 14.0,  "resting": 0.50, "damping": 0.40},
+	Preset.SEDAN:         {"mass": 1500.0, "cog": -0.20, "weight": 0.52, "split": 0.0, "spring_ratio": 0.50, "wheel_mass": 18.0,  "resting": 0.50, "damping": 0.40},
+	Preset.SPORTS:        {"mass": 1300.0, "cog": -0.28, "weight": 0.47, "split": 0.0, "spring_ratio": 0.40, "wheel_mass": 16.0,  "resting": 0.45, "damping": 0.50},
+	Preset.SUV:           {"mass": 2200.0, "cog": -0.10, "weight": 0.55, "split": 0.4, "spring_ratio": 0.60, "wheel_mass": 24.0,  "resting": 0.50, "damping": 0.45},
+	Preset.PICKUP:        {"mass": 2500.0, "cog": -0.08, "weight": 0.57, "split": 0.2, "spring_ratio": 0.60, "wheel_mass": 30.0,  "resting": 0.45, "damping": 0.45},
+	Preset.MONSTER_TRUCK: {"mass": 4800.0, "cog": -0.60, "weight": 0.50, "split": 0.5, "spring_ratio": 0.78, "wheel_mass": 340.0, "resting": 0.30, "damping": 0.35},
 }
 
 static func values(preset: Preset) -> Dictionary:
