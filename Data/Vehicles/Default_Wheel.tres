@@ -6,4 +6,6 @@
 [resource]
 script = ExtResource("1_y2j7x")
 wheel_scene = ExtResource("2_j2rm0")
+wheel_scale = 1.037
+tire_radius = 0.5
 metadata/_custom_type_script = "uid://blyo8bhh84ssk"

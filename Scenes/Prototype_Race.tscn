@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://cv1ix08r15fwd" path="res://Game/Racing/race_manager.gd" id="6_mvfyj"]
 [ext_resource type="Script" uid="uid://d3e7x50s66e7q" path="res://Game/Racing/race_hud.gd" id="7_yp6ad"]
 [ext_resource type="PackedScene" path="res://Game/Racing/checkpoint.tscn" id="8_2b27c"]
+[ext_resource type="PackedScene" uid="uid://d2mjsfhnvrv4o" path="res://Game/AI/ai_Bug.tscn" id="10_56n0e"]
 [ext_resource type="PackedScene" uid="uid://wvbq70xu1hqx" path="res://Game/AI/AI_Sedan.tscn" id="10_ewpl2"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
@@ -49,6 +50,9 @@ uv2_world_triplanar = true
 
 [node name="Game" type="Node3D" unique_id=1962728950]
 
+[node name="Sky" type="Node3D" parent="." unique_id=1612101788]
+transform = Transform3D(-4.3711534e-08, 0, 1.0000033, 0, 1, 0, -1.0000033, 0, -4.3711534e-08, -15.327522, 1.8676759, 150.50475)
+
 [node name="Jump_pad" parent="." unique_id=155708816 instance=ExtResource("1_u1002")]
 transform = Transform3D(4, 0, 0, 0, 2, 0, 0, 0, 4, -32.3545, -0.39248, -20.31856)
 
@@ -77,7 +81,7 @@ environment = SubResource("Env")
 [node name="Road" type="Node3D" parent="." unique_id=2055077946]
 
 [node name="Road" type="StaticBody3D" parent="Road" unique_id=1624371218]
-transform = Transform3D(25.559582, 0, 0, 0, 2.16, 0, 0, 0, 146.85322, 401.61796, -0.821964, -51.871734)
+transform = Transform3D(25.559582, 0, 0, 0, 2.16, 0, 0, 0, 146.85323, 401.61795, -0.821964, -51.871735)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Road/Road" unique_id=1780446120]
 shape = SubResource("BoxShape3D_heayu")
@@ -87,7 +91,7 @@ mesh = SubResource("BoxMesh_0hclv")
 surface_material_override/0 = SubResource("StandardMaterial3D_5klpn")
 
 [node name="Arena_PSX" parent="." unique_id=622443805 instance=ExtResource("5_40qc8")]
-transform = Transform3D(0, 0, -4, 0, 4, 0, 4, 0, 0, -31.774688, 0.000021, -26.06189)
+transform = Transform3D(0, 0, -4, 0, 4, 0, 4, 0, 0, -31.774689, 2.1e-05, -26.06189)
 
 [node name="RaceManager" type="Node" parent="." unique_id=1859031099]
 script = ExtResource("6_mvfyj")
@@ -96,18 +100,19 @@ script = ExtResource("6_mvfyj")
 script = ExtResource("7_yp6ad")
 
 [node name="Grid" type="Node3D" parent="." unique_id=2117726721]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.1377, 0, 0)
 
 [node name="Spawn1" type="Marker3D" parent="Grid" unique_id=1749345827]
-transform = Transform3D(0.03502, 0, -0.99939, 0, 1, 0, 0.99939, 0, 0.03502, -42.46522, 1.1, 150.50474)
+transform = Transform3D(-4.3711534e-08, 0, 1.0000033, 0, 1, 0, -1.0000033, 0, -4.3711534e-08, -42.46522, 1.8676759, 150.50475)
 
 [node name="Spawn2" type="Marker3D" parent="Grid" unique_id=131553000]
-transform = Transform3D(0.03502, 0, -0.99939, 0, 1, 0, 0.99939, 0, 0.03502, -43.09562, 1.1, 168.4937)
+transform = Transform3D(-4.3711534e-08, 0, 1.0000033, 0, 1, 0, -1.0000033, 0, -4.3711534e-08, -43.09562, 1.8676759, 168.4937)
 
 [node name="Spawn3" type="Marker3D" parent="Grid" unique_id=1118971620]
-transform = Transform3D(0.06668, 0, -0.99777, 0, 1, 0, 0.99777, 0, 0.06668, -51.3795, 1.1, 150.05162)
+transform = Transform3D(-4.3711196e-08, 0, 0.9999956, 0, 1, 0, -0.9999956, 0, -4.3711196e-08, -51.3795, 1.8676759, 150.05162)
 
 [node name="Spawn4" type="Marker3D" parent="Grid" unique_id=735101497]
-transform = Transform3D(0.06668, 0, -0.99777, 0, 1, 0, 0.99777, 0, 0.06668, -52.57982, 1.1, 168.01156)
+transform = Transform3D(-4.3711196e-08, 0, 0.9999956, 0, 1, 0, -0.9999956, 0, -4.3711196e-08, -52.57982, 1.8676759, 168.01157)
 
 [node name="Checkpoints" type="Node3D" parent="." unique_id=738185660]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 2.66, 0)
@@ -143,12 +148,12 @@ transform = Transform3D(1.344564, 0, 1.439493, 0, 1, 0, -1.344564, 0, 1.439493, 
 transform = Transform3D(2.1524, 0, 1.45848, 0, 1, 0, -0.56096, 0, 0.82785, 38.98402, 0, 62.65225)
 
 [node name="ModularAICar2" parent="." unique_id=1169076963 instance=ExtResource("10_ewpl2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 81.739624, 1.568632, -84.228348)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 81.739624, 1.568632, -84.22835)
 
 [node name="Arena_Parameters" type="Node3D" parent="." unique_id=842919760]
 
 [node name="Left_Top" type="StaticBody3D" parent="Arena_Parameters" unique_id=1148998804]
-transform = Transform3D(9.892023, 0, 0, 0, 37.22224, 0, 0, 0, 9.7893, 127.986846, -0.821964, 201.16164)
+transform = Transform3D(9.892023, 0, 0, 0, 37.22224, 0, 0, 0, 9.7893, 127.98685, -0.821964, 201.16164)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Arena_Parameters/Left_Top" unique_id=742701668]
 shape = SubResource("BoxShape3D_heayu")
@@ -168,7 +173,7 @@ mesh = SubResource("BoxMesh_0hclv")
 surface_material_override/0 = SubResource("StandardMaterial3D_5klpn")
 
 [node name="Left_Bottom" type="StaticBody3D" parent="Arena_Parameters" unique_id=1991157505]
-transform = Transform3D(9.892023, 0, 0, 0, 37.22224, 0, 0, 0, 9.7893, 127.986846, -0.821964, -241.798752)
+transform = Transform3D(9.892023, 0, 0, 0, 37.22224, 0, 0, 0, 9.7893, 127.98685, -0.821964, -241.79875)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Arena_Parameters/Left_Bottom" unique_id=1250564133]
 shape = SubResource("BoxShape3D_heayu")
@@ -178,7 +183,7 @@ mesh = SubResource("BoxMesh_0hclv")
 surface_material_override/0 = SubResource("StandardMaterial3D_5klpn")
 
 [node name="Right_Bottom" type="StaticBody3D" parent="Arena_Parameters" unique_id=1011464048]
-transform = Transform3D(9.892023, 0, 0, 0, 37.22224, 0, 0, 0, 9.7893, -192.69586, -0.821964, -241.798752)
+transform = Transform3D(9.892023, 0, 0, 0, 37.22224, 0, 0, 0, 9.7893, -192.69586, -0.821964, -241.79875)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Arena_Parameters/Right_Bottom" unique_id=696276810]
 shape = SubResource("BoxShape3D_heayu")
@@ -186,3 +191,9 @@ shape = SubResource("BoxShape3D_heayu")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Arena_Parameters/Right_Bottom" unique_id=485748318]
 mesh = SubResource("BoxMesh_0hclv")
 surface_material_override/0 = SubResource("StandardMaterial3D_5klpn")
+
+[node name="Road_Walls" type="Node3D" parent="." unique_id=1988726332]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -79.796555, 2.1963999e-07, 61.02224)
+
+[node name="ModularAICar" parent="." unique_id=1045362832 instance=ExtResource("10_56n0e")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 78.372795, 2.0649126, -84.40934)

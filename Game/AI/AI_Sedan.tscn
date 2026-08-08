@@ -9,7 +9,9 @@ script = ExtResource("3_qp06a")
 body_scene = ExtResource("2_881ln")
 front_axle_z = -1.745
 rear_axle_z = 1.455
-axle_height = -0.20500000000000007
+axle_height = -0.2250000000000001
+collision_size = Vector3(2.065, 1.14, 5.175)
+collision_offset = Vector3(0, 0.35, -0.043)
 display_name = "Jason"
 body_tint = Color(0, 0, 0, 1)
 metadata/_custom_type_script = "uid://cgo74qge4i3xm"
@@ -18,3 +20,4 @@ metadata/_custom_type_script = "uid://cgo74qge4i3xm"
 
 [node name="Vehicle" parent="." index="0" unique_id=417180606]
 definition = SubResource("Resource_lu1nm")
+automatic_time_between_shifts = 1000.0
