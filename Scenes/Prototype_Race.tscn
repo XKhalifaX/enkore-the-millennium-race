@@ -50,15 +50,15 @@ uv2_world_triplanar = true
 [node name="Game" type="Node3D" unique_id=1962728950]
 
 [node name="Jump_pad" parent="." unique_id=155708816 instance=ExtResource("1_u1002")]
-transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 2, -16.17725, -0.19624, -10.15928)
+transform = Transform3D(4, 0, 0, 0, 2, 0, 0, 0, 4, -32.3545, -0.39248, -20.31856)
 
 [node name="Racers" type="Node3D" parent="." unique_id=47745896]
 
 [node name="Vehicle_Sys_Test" parent="Racers" unique_id=800942716 instance=ExtResource("2_k0ien")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.04908, 0, -0.5038945)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60.09816, 0, -1.007789)
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=139412134 groups=["Road"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -1, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=306641618]
 shape = SubResource("BoxShape3D_ground")
@@ -77,7 +77,7 @@ environment = SubResource("Env")
 [node name="Road" type="Node3D" parent="." unique_id=2055077946]
 
 [node name="Road" type="StaticBody3D" parent="Road" unique_id=1624371218]
-transform = Transform3D(12.779791, 0, 0, 0, 1.08, 0, 0, 0, 73.42661, 53.381115, -0.41098213, -25.935867)
+transform = Transform3D(25.559582, 0, 0, 0, 2.16, 0, 0, 0, 146.85322, 401.61796, -0.821964, -51.871734)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Road/Road" unique_id=1780446120]
 shape = SubResource("BoxShape3D_heayu")
@@ -87,7 +87,7 @@ mesh = SubResource("BoxMesh_0hclv")
 surface_material_override/0 = SubResource("StandardMaterial3D_5klpn")
 
 [node name="Arena_PSX" parent="." unique_id=622443805 instance=ExtResource("5_40qc8")]
-transform = Transform3D(-8.742278e-08, 0, -2, 0, 2, 0, 2, 0, -8.742278e-08, -15.887344, 1.04904175e-05, -13.030945)
+transform = Transform3D(0, 0, -4, 0, 4, 0, 4, 0, 0, -31.774688, 0.000021, -26.06189)
 
 [node name="RaceManager" type="Node" parent="." unique_id=1859031099]
 script = ExtResource("6_mvfyj")
@@ -98,19 +98,19 @@ script = ExtResource("7_yp6ad")
 [node name="Grid" type="Node3D" parent="." unique_id=2117726721]
 
 [node name="Spawn1" type="Marker3D" parent="Grid" unique_id=1749345827]
-transform = Transform3D(0.03502, 0, -0.99939, 0, 1, 0, 0.99939, 0, 0.03502, -21.23261, 1.1, 75.25237)
+transform = Transform3D(0.03502, 0, -0.99939, 0, 1, 0, 0.99939, 0, 0.03502, -42.46522, 1.1, 150.50474)
 
 [node name="Spawn2" type="Marker3D" parent="Grid" unique_id=131553000]
-transform = Transform3D(0.03502, 0, -0.99939, 0, 1, 0, 0.99939, 0, 0.03502, -21.54781, 1.1, 84.24685)
+transform = Transform3D(0.03502, 0, -0.99939, 0, 1, 0, 0.99939, 0, 0.03502, -43.09562, 1.1, 168.4937)
 
 [node name="Spawn3" type="Marker3D" parent="Grid" unique_id=1118971620]
-transform = Transform3D(0.06668, 0, -0.99777, 0, 1, 0, 0.99777, 0, 0.06668, -25.68975, 1.1, 75.02581)
+transform = Transform3D(0.06668, 0, -0.99777, 0, 1, 0, 0.99777, 0, 0.06668, -51.3795, 1.1, 150.05162)
 
 [node name="Spawn4" type="Marker3D" parent="Grid" unique_id=735101497]
-transform = Transform3D(0.06668, 0, -0.99777, 0, 1, 0, 0.99777, 0, 0.06668, -26.28991, 1.1, 84.00578)
+transform = Transform3D(0.06668, 0, -0.99777, 0, 1, 0, 0.99777, 0, 0.06668, -52.57982, 1.1, 168.01156)
 
 [node name="Checkpoints" type="Node3D" parent="." unique_id=738185660]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.33, 0)
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 2.66, 0)
 
 [node name="CP01_StartFinish" parent="Checkpoints" unique_id=840082049 instance=ExtResource("8_2b27c")]
 transform = Transform3D(0, 0, 2.6, 0, 1, 0, -1, 0, 0, -16.17725, 0, 79.84072)
@@ -119,10 +119,10 @@ transform = Transform3D(0, 0, 2.6, 0, 1, 0, -1, 0, 0, -16.17725, 0, 79.84072)
 transform = Transform3D(-2.1524, 0, 1.45848, 0, 1, 0, -0.56096, 0, -0.82785, -71.33853, 0, 62.65225)
 
 [node name="CP03" parent="Checkpoints" unique_id=763154193 instance=ExtResource("8_2b27c")]
-transform = Transform3D(1.3445638, 0, -1.4394927, 0, 1, 0, 1.3445638, 0, 1.4394927, -50.2688, 0, 17.65225)
+transform = Transform3D(1.344564, 0, -1.439493, 0, 1, 0, 1.344564, 0, 1.439493, -50.2688, 0, 17.65225)
 
 [node name="CP04" parent="Checkpoints" unique_id=1032435013 instance=ExtResource("8_2b27c")]
-transform = Transform3D(1.3445638, 0, -1.4394927, 0, 1, 0, 1.3445638, 0, 1.4394927, 17.91429, 0, -37.97081)
+transform = Transform3D(1.344564, 0, -1.439493, 0, 1, 0, 1.344564, 0, 1.439493, 17.91429, 0, -37.97081)
 
 [node name="CP05" parent="Checkpoints" unique_id=1117824778 instance=ExtResource("8_2b27c")]
 transform = Transform3D(-2.1524, 0, 1.45848, 0, 1, 0, -0.56096, 0, -0.82785, 38.98402, 0, -82.97081)
@@ -134,21 +134,21 @@ transform = Transform3D(0, 0, 2.6, 0, 1, 0, -1, 0, 0, -16.17725, 0, -100.15928)
 transform = Transform3D(2.1524, 0, 1.45848, 0, 1, 0, -0.56096, 0, 0.82785, -71.33853, 0, -82.97081)
 
 [node name="CP08" parent="Checkpoints" unique_id=1492300051 instance=ExtResource("8_2b27c")]
-transform = Transform3D(1.3445638, 0, 1.4394927, 0, 1, 0, -1.3445638, 0, 1.4394927, -50.2688, 0, -37.97081)
+transform = Transform3D(1.344564, 0, 1.439493, 0, 1, 0, -1.344564, 0, 1.439493, -50.2688, 0, -37.97081)
 
 [node name="CP09" parent="Checkpoints" unique_id=139132440 instance=ExtResource("8_2b27c")]
-transform = Transform3D(1.3445638, 0, 1.4394927, 0, 1, 0, -1.3445638, 0, 1.4394927, 17.91429, 0, 17.65225)
+transform = Transform3D(1.344564, 0, 1.439493, 0, 1, 0, -1.344564, 0, 1.439493, 17.91429, 0, 17.65225)
 
 [node name="CP10" parent="Checkpoints" unique_id=21750923 instance=ExtResource("8_2b27c")]
 transform = Transform3D(2.1524, 0, 1.45848, 0, 1, 0, -0.56096, 0, 0.82785, 38.98402, 0, 62.65225)
 
 [node name="ModularAICar2" parent="." unique_id=1169076963 instance=ExtResource("10_ewpl2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.869812, 1.5686321, -42.114174)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 81.739624, 1.568632, -84.228348)
 
 [node name="Arena_Parameters" type="Node3D" parent="." unique_id=842919760]
 
 [node name="Left_Top" type="StaticBody3D" parent="Arena_Parameters" unique_id=1148998804]
-transform = Transform3D(4.9460115, 0, 0, 0, 18.61112, 0, 0, 0, 4.89465, 63.993423, -0.41098213, 100.58082)
+transform = Transform3D(9.892023, 0, 0, 0, 37.22224, 0, 0, 0, 9.7893, 127.986846, -0.821964, 201.16164)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Arena_Parameters/Left_Top" unique_id=742701668]
 shape = SubResource("BoxShape3D_heayu")
@@ -158,7 +158,7 @@ mesh = SubResource("BoxMesh_0hclv")
 surface_material_override/0 = SubResource("StandardMaterial3D_5klpn")
 
 [node name="Right_Top" type="StaticBody3D" parent="Arena_Parameters" unique_id=1162520174]
-transform = Transform3D(4.9460115, 0, 0, 0, 18.61112, 0, 0, 0, 4.89465, -96.34793, -0.41098213, 100.58082)
+transform = Transform3D(9.892023, 0, 0, 0, 37.22224, 0, 0, 0, 9.7893, -192.69586, -0.821964, 201.16164)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Arena_Parameters/Right_Top" unique_id=1308644192]
 shape = SubResource("BoxShape3D_heayu")
@@ -168,7 +168,7 @@ mesh = SubResource("BoxMesh_0hclv")
 surface_material_override/0 = SubResource("StandardMaterial3D_5klpn")
 
 [node name="Left_Bottom" type="StaticBody3D" parent="Arena_Parameters" unique_id=1991157505]
-transform = Transform3D(4.9460115, 0, 0, 0, 18.61112, 0, 0, 0, 4.89465, 63.993423, -0.41098213, -120.899376)
+transform = Transform3D(9.892023, 0, 0, 0, 37.22224, 0, 0, 0, 9.7893, 127.986846, -0.821964, -241.798752)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Arena_Parameters/Left_Bottom" unique_id=1250564133]
 shape = SubResource("BoxShape3D_heayu")
@@ -178,7 +178,7 @@ mesh = SubResource("BoxMesh_0hclv")
 surface_material_override/0 = SubResource("StandardMaterial3D_5klpn")
 
 [node name="Right_Bottom" type="StaticBody3D" parent="Arena_Parameters" unique_id=1011464048]
-transform = Transform3D(4.9460115, 0, 0, 0, 18.61112, 0, 0, 0, 4.89465, -96.34793, -0.41098213, -120.899376)
+transform = Transform3D(9.892023, 0, 0, 0, 37.22224, 0, 0, 0, 9.7893, -192.69586, -0.821964, -241.798752)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Arena_Parameters/Right_Bottom" unique_id=696276810]
 shape = SubResource("BoxShape3D_heayu")
