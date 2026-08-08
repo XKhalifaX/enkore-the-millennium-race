@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://c5ojiwtkj2r8m"
-path="res://.godot/imported/Freebird.fbx-ded3128dc0a0e168fc86f40768ca8427.scn"
+path="res://.godot/imported/Freebird.fbx-f2726c4b9bace90f206081bca4f5e6db.scn"
 
 [deps]
 
 source_file="res://Art/Models/Vehicles/Freebird.fbx"
-dest_files=["res://.godot/imported/Freebird.fbx-ded3128dc0a0e168fc86f40768ca8427.scn"]
+dest_files=["res://.godot/imported/Freebird.fbx-f2726c4b9bace90f206081bca4f5e6db.scn"]
 
 [params]
 

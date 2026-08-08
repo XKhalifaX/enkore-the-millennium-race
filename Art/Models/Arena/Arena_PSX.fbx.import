@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://ckyd36pyah4pj"
-path="res://.godot/imported/Arena_PSX.fbx-2a1acb7337da38d765d376b4f5d46d5f.scn"
+path="res://.godot/imported/Arena_PSX.fbx-441cc39b5252922721a6d8f15b4a5271.scn"
 
 [deps]
 
 source_file="res://Art/Models/Arena/Arena_PSX.fbx"
-dest_files=["res://.godot/imported/Arena_PSX.fbx-2a1acb7337da38d765d376b4f5d46d5f.scn"]
+dest_files=["res://.godot/imported/Arena_PSX.fbx-441cc39b5252922721a6d8f15b4a5271.scn"]
 
 [params]
 

@@ -95,51 +95,51 @@ script = ExtResource("6_mvfyj")
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=633784205]
 script = ExtResource("7_yp6ad")
 
-[node name="Grid" type="Node3D" parent="."]
+[node name="Grid" type="Node3D" parent="." unique_id=2117726721]
 
-[node name="Spawn1" type="Marker3D" parent="Grid"]
+[node name="Spawn1" type="Marker3D" parent="Grid" unique_id=1749345827]
 transform = Transform3D(0.03502, 0, -0.99939, 0, 1, 0, 0.99939, 0, 0.03502, -21.23261, 1.1, 75.25237)
 
-[node name="Spawn2" type="Marker3D" parent="Grid"]
+[node name="Spawn2" type="Marker3D" parent="Grid" unique_id=131553000]
 transform = Transform3D(0.03502, 0, -0.99939, 0, 1, 0, 0.99939, 0, 0.03502, -21.54781, 1.1, 84.24685)
 
-[node name="Spawn3" type="Marker3D" parent="Grid"]
+[node name="Spawn3" type="Marker3D" parent="Grid" unique_id=1118971620]
 transform = Transform3D(0.06668, 0, -0.99777, 0, 1, 0, 0.99777, 0, 0.06668, -25.68975, 1.1, 75.02581)
 
-[node name="Spawn4" type="Marker3D" parent="Grid"]
+[node name="Spawn4" type="Marker3D" parent="Grid" unique_id=735101497]
 transform = Transform3D(0.06668, 0, -0.99777, 0, 1, 0, 0.99777, 0, 0.06668, -26.28991, 1.1, 84.00578)
 
-[node name="Checkpoints" type="Node3D" parent="."]
+[node name="Checkpoints" type="Node3D" parent="." unique_id=738185660]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.33, 0)
 
-[node name="CP01_StartFinish" parent="Checkpoints" instance=ExtResource("8_2b27c")]
+[node name="CP01_StartFinish" parent="Checkpoints" unique_id=840082049 instance=ExtResource("8_2b27c")]
 transform = Transform3D(0, 0, 2.6, 0, 1, 0, -1, 0, 0, -16.17725, 0, 79.84072)
 
-[node name="CP02" parent="Checkpoints" instance=ExtResource("8_2b27c")]
+[node name="CP02" parent="Checkpoints" unique_id=251715892 instance=ExtResource("8_2b27c")]
 transform = Transform3D(-2.1524, 0, 1.45848, 0, 1, 0, -0.56096, 0, -0.82785, -71.33853, 0, 62.65225)
 
-[node name="CP03" parent="Checkpoints" instance=ExtResource("8_2b27c")]
-transform = Transform3D(-1.75209, 0, -1.92098, 0, 1, 0, 0.73884, 0, -0.67388, -50.2688, 0, 17.65225)
+[node name="CP03" parent="Checkpoints" unique_id=763154193 instance=ExtResource("8_2b27c")]
+transform = Transform3D(1.3445638, 0, -1.4394927, 0, 1, 0, 1.3445638, 0, 1.4394927, -50.2688, 0, 17.65225)
 
-[node name="CP04" parent="Checkpoints" instance=ExtResource("8_2b27c")]
-transform = Transform3D(-1.75209, 0, -1.92098, 0, 1, 0, 0.73884, 0, -0.67388, 17.91429, 0, -37.97081)
+[node name="CP04" parent="Checkpoints" unique_id=1032435013 instance=ExtResource("8_2b27c")]
+transform = Transform3D(1.3445638, 0, -1.4394927, 0, 1, 0, 1.3445638, 0, 1.4394927, 17.91429, 0, -37.97081)
 
-[node name="CP05" parent="Checkpoints" instance=ExtResource("8_2b27c")]
+[node name="CP05" parent="Checkpoints" unique_id=1117824778 instance=ExtResource("8_2b27c")]
 transform = Transform3D(-2.1524, 0, 1.45848, 0, 1, 0, -0.56096, 0, -0.82785, 38.98402, 0, -82.97081)
 
-[node name="CP06" parent="Checkpoints" instance=ExtResource("8_2b27c")]
-transform = Transform3D(-0, 0, 2.6, 0, 1, 0, -1, 0, -0, -16.17725, 0, -100.15928)
+[node name="CP06" parent="Checkpoints" unique_id=78146969 instance=ExtResource("8_2b27c")]
+transform = Transform3D(0, 0, 2.6, 0, 1, 0, -1, 0, 0, -16.17725, 0, -100.15928)
 
-[node name="CP07" parent="Checkpoints" instance=ExtResource("8_2b27c")]
+[node name="CP07" parent="Checkpoints" unique_id=1387203168 instance=ExtResource("8_2b27c")]
 transform = Transform3D(2.1524, 0, 1.45848, 0, 1, 0, -0.56096, 0, 0.82785, -71.33853, 0, -82.97081)
 
-[node name="CP08" parent="Checkpoints" instance=ExtResource("8_2b27c")]
-transform = Transform3D(1.75209, 0, -1.92098, 0, 1, 0, 0.73884, 0, 0.67388, -50.2688, 0, -37.97081)
+[node name="CP08" parent="Checkpoints" unique_id=1492300051 instance=ExtResource("8_2b27c")]
+transform = Transform3D(1.3445638, 0, 1.4394927, 0, 1, 0, -1.3445638, 0, 1.4394927, -50.2688, 0, -37.97081)
 
-[node name="CP09" parent="Checkpoints" instance=ExtResource("8_2b27c")]
-transform = Transform3D(1.75209, 0, -1.92098, 0, 1, 0, 0.73884, 0, 0.67388, 17.91429, 0, 17.65225)
+[node name="CP09" parent="Checkpoints" unique_id=139132440 instance=ExtResource("8_2b27c")]
+transform = Transform3D(1.3445638, 0, 1.4394927, 0, 1, 0, -1.3445638, 0, 1.4394927, 17.91429, 0, 17.65225)
 
-[node name="CP10" parent="Checkpoints" instance=ExtResource("8_2b27c")]
+[node name="CP10" parent="Checkpoints" unique_id=21750923 instance=ExtResource("8_2b27c")]
 transform = Transform3D(2.1524, 0, 1.45848, 0, 1, 0, -0.56096, 0, 0.82785, 38.98402, 0, 62.65225)
 
 [node name="ModularAICar2" parent="." unique_id=1169076963 instance=ExtResource("10_ewpl2")]

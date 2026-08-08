@@ -6,7 +6,8 @@
 [resource]
 script = ExtResource("2_eola0")
 body_scene = ExtResource("1_5fomv")
-front_axle_z = -1.5199999999999996
-rear_axle_z = 1.73
+front_axle_z = -1.745
+rear_axle_z = 1.455
 axle_height = -0.20500000000000007
+body_tint = Color(0.38258234, 0.5440749, 0.4935683, 1)
 metadata/_custom_type_script = "uid://cgo74qge4i3xm"
