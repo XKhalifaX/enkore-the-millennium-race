@@ -39,6 +39,23 @@ extends Resource
 @export var collision_size := Vector3(1.8, 1.0, 4.4)
 @export var collision_offset := Vector3(0.0, 0.575, 0.152)
 
+@export_group("Chassis")
+## Override the baked physics (mass, centre of gravity, drivetrain, suspension).
+## These can't be changed live like the handling preset — they're set once when
+## the vehicle initializes. Needed for distinct vehicles: a monster truck must be
+## heavy, low-slung, all-wheel-drive with long suspension so it doesn't wheelie.
+## Off = keep whatever is set on the Vehicle node.
+@export var override_chassis := false
+@export var mass := 1500.0
+## Lowers the centre of gravity. More negative = harder to tip or wheelie.
+@export_range(-2.0, 1.0, 0.05) var cog_height_offset := -0.2
+@export_range(0.0, 1.0, 0.01) var front_weight_distribution := 0.5
+## Drive split: 0 = RWD (wheelie-prone), 1 = FWD, 0.5 = AWD (planted).
+@export_range(0.0, 1.0, 0.05) var front_torque_split := 0.0
+## Suspension travel. Big wheels need long travel to stay planted.
+@export_range(0.05, 1.5, 0.005) var front_spring_length := 0.15
+@export_range(0.05, 1.5, 0.005) var rear_spring_length := 0.2
+
 @export_group("Handling")
 ## Handling archetype applied to this car at spawn (steering, grip, stability,
 ## power, aero — the same presets as the F1 tuning panel). "Scene default"

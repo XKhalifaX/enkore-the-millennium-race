@@ -66,10 +66,17 @@ func _ready() -> void:
 	if spec and spec.tire_radius > 0.0:
 		front_tire_radius = spec.tire_radius
 		rear_tire_radius = spec.tire_radius
-	# Handling is applied BEFORE init so its grip values propagate into the
-	# wheels as they are set up; the gearbox is applied AFTER init because it
-	# needs average_drive_wheel_radius, which init computes.
+	# Chassis and handling are applied BEFORE init so their baked/grip values are
+	# used as the rig sets up; the gearbox is applied AFTER init because it needs
+	# average_drive_wheel_radius, which init computes.
 	if definition:
+		if definition.override_chassis:
+			vehicle_mass = definition.mass
+			center_of_gravity_height_offset = definition.cog_height_offset
+			front_weight_distribution = definition.front_weight_distribution
+			front_torque_split = definition.front_torque_split
+			front_spring_length = definition.front_spring_length
+			rear_spring_length = definition.rear_spring_length
 		HandlingPresets.apply(self, definition.handling_preset)
 	super()
 	_apply_gearbox_from_definition()
