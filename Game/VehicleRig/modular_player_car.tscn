@@ -1,0 +1,90 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="PackedScene" path="res://Game/VehicleRig/vehicle_controller.tscn" id="1_ctrl"]
+[ext_resource type="Script" uid="uid://mptx2bx8iko2" path="res://Game/Modular/modular_vehicle.gd" id="2_veh"]
+[ext_resource type="Resource" uid="uid://bn57hyoktm2ie" path="res://Data/Vehicles/Test_Sedan.tres" id="3_def"]
+[ext_resource type="Resource" uid="uid://bklwgy1sed7ra" path="res://Data/Vehicles/Default_Wheel.tres" id="4_whl"]
+[ext_resource type="PackedScene" path="res://Game/VehicleRig/engine_sound.tscn" id="5_snd"]
+[ext_resource type="PackedScene" path="res://Game/VehicleRig/smoke_effect.tscn" id="6_smoke"]
+[ext_resource type="Script" uid="uid://cwfihp12l0gxj" path="res://Game/VehicleRig/gui.gd" id="7_gui"]
+[ext_resource type="Script" uid="uid://cmsbki14h4tfg" path="res://Game/VehicleRig/debug.gd" id="8_dbg"]
+[ext_resource type="Script" uid="uid://dogwn6jvmsbi" path="res://Game/VehicleRig/debug_ui.gd" id="9_dbgui"]
+[ext_resource type="Script" uid="uid://bmqecb0k2eqkq" path="res://Game/VehicleRig/cam.gd" id="10_cam"]
+[ext_resource type="Script" uid="uid://de1sxqwngo6mo" path="res://Game/VehicleRig/tuning_panel.gd" id="11_tune"]
+
+[node name="ModularPlayerCar" type="Node3D"]
+
+[node name="VehicleController" parent="." node_paths=PackedStringArray("vehicle_node") instance=ExtResource("1_ctrl")]
+vehicle_node = NodePath("Vehicle")
+
+[node name="Vehicle" type="RigidBody3D" parent="VehicleController"]
+script = ExtResource("2_veh")
+definition = ExtResource("3_def")
+wheels = ExtResource("4_whl")
+
+[node name="EngineSound" parent="VehicleController/Vehicle" node_paths=PackedStringArray("vehicle") instance=ExtResource("5_snd")]
+vehicle = NodePath("..")
+
+[node name="Smoke" parent="VehicleController/Vehicle" node_paths=PackedStringArray("vehicle") instance=ExtResource("6_smoke")]
+vehicle = NodePath("..")
+
+[node name="GUI" type="Control" parent="." node_paths=PackedStringArray("vehicle")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("7_gui")
+vehicle = NodePath("../VehicleController/Vehicle")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GUI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Speed" type="Label" parent="GUI/VBoxContainer"]
+layout_mode = 2
+
+[node name="RPM" type="Label" parent="GUI/VBoxContainer"]
+layout_mode = 2
+
+[node name="Gear" type="Label" parent="GUI/VBoxContainer"]
+layout_mode = 2
+
+[node name="Debug" type="Node" parent="." node_paths=PackedStringArray("vehicle")]
+script = ExtResource("8_dbg")
+vehicle = NodePath("../VehicleController/Vehicle")
+show_debug = false
+
+[node name="DebugUI" type="Control" parent="Debug"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("9_dbgui")
+
+[node name="TuningPanel" type="Control" parent="." node_paths=PackedStringArray("vehicle")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("11_tune")
+vehicle = NodePath("../VehicleController/Vehicle")
+
+[node name="Camera" type="SpringArm3D" parent="." node_paths=PackedStringArray("target")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 4)
+script = ExtResource("10_cam")
+target = NodePath("../VehicleController/Vehicle")
+
+[node name="Node3D" type="Node3D" parent="Camera"]
+
+[node name="Camera3D" type="Camera3D" parent="Camera/Node3D"]

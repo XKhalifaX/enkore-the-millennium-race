@@ -10,12 +10,15 @@ var _rm: RaceManager
 var _player: Node3D
 var _info: Label
 var _center: Label
+var _closest: Label
+var _rivals: Array[MeridianVehicle] = []
 var _finished := false
 
 func _ready() -> void:
 	_build_ui()
 	_rm = get_tree().get_first_node_in_group("race_manager") as RaceManager
 	_player = _find_player()
+	_gather_rivals()
 	if _rm:
 		_rm.countdown_tick.connect(_on_countdown)
 		_rm.race_started.connect(_on_go)
@@ -31,6 +34,33 @@ func _process(_delta: float) -> void:
 		var pos := _rm.get_position(_player)
 		_info.text = "LAP %d/%d    POS %d/%d    %s" % [
 			lap, _rm.total_laps, pos, _rm.get_racer_count(), _format_time(_rm.race_time)]
+	_update_closest()
+
+## Bottom-right nameplate: who is nearest to the player right now.
+func _update_closest() -> void:
+	var nearest: MeridianVehicle = null
+	var best := INF
+	var here := _player.global_position
+	for rival in _rivals:
+		if rival == null or not is_instance_valid(rival):
+			continue
+		var d := here.distance_to(rival.global_position)
+		if d < best:
+			best = d
+			nearest = rival
+	if nearest == null:
+		_closest.text = ""
+	else:
+		_closest.text = "Nearest\n%s   %dm" % [_racer_name(nearest), int(round(best))]
+
+## Display name for a racer: its VehicleDefinition name if it has one,
+## otherwise the root node name.
+func _racer_name(v: MeridianVehicle) -> String:
+	var def = v.get("definition")
+	if def != null and def.display_name != "":
+		return def.display_name
+	var root := v.owner if v.owner else v.get_parent()
+	return root.name if root else v.name
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
@@ -81,6 +111,17 @@ func _build_ui() -> void:
 	_center.visible = false
 	root.add_child(_center)
 
+	_closest = Label.new()
+	_closest.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_closest.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	_closest.add_theme_font_size_override("font_size", 18)
+	_closest.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	_closest.offset_left = -260
+	_closest.offset_top = -70
+	_closest.offset_right = -14
+	_closest.offset_bottom = -14
+	root.add_child(_closest)
+
 ## Finds the car the HUD reports on. Tree order is NOT reliable once AI cars
 ## exist, so prefer the vehicle that is actually driven by input: the player's
 ## car sits under a MeridianVehicleController, rivals under an AIDriver.
@@ -110,6 +151,17 @@ func _first_vehicle(node: Node) -> Node3D:
 		if r:
 			return r
 	return null
+
+## Every racing vehicle except the player.
+func _gather_rivals() -> void:
+	_rivals.clear()
+	_collect_vehicles(get_tree().root)
+
+func _collect_vehicles(node: Node) -> void:
+	if node is MeridianVehicle and node != _player:
+		_rivals.append(node as MeridianVehicle)
+	for child in node.get_children():
+		_collect_vehicles(child)
 
 func _format_time(t: float) -> String:
 	var minutes := int(t) / 60
