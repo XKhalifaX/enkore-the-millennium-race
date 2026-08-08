@@ -11,7 +11,9 @@ var _player: Node3D
 var _info: Label
 var _center: Label
 var _closest: Label
+var _leaderboard: Label
 var _rivals: Array[MeridianVehicle] = []
+var _all_racers: Array[MeridianVehicle] = []
 var _finished := false
 
 func _ready() -> void:
@@ -19,6 +21,10 @@ func _ready() -> void:
 	_rm = get_tree().get_first_node_in_group("race_manager") as RaceManager
 	_player = _find_player()
 	_gather_rivals()
+	_all_racers.clear()
+	if _player is MeridianVehicle:
+		_all_racers.append(_player as MeridianVehicle)
+	_all_racers.append_array(_rivals)
 	if _rm:
 		_rm.countdown_tick.connect(_on_countdown)
 		_rm.race_started.connect(_on_go)
@@ -35,6 +41,21 @@ func _process(_delta: float) -> void:
 		_info.text = "LAP %d/%d    POS %d/%d    %s" % [
 			lap, _rm.total_laps, pos, _rm.get_racer_count(), _format_time(_rm.race_time)]
 	_update_closest()
+	_update_leaderboard()
+
+## Left-side live standings: every racer ranked by race position.
+func _update_leaderboard() -> void:
+	if _rm == null:
+		return
+	var order := _all_racers.filter(func(v): return v != null and is_instance_valid(v))
+	order.sort_custom(func(a, b): return _rm.get_position(a) < _rm.get_position(b))
+	var lines: Array[String] = ["STANDINGS"]
+	var place := 1
+	for v in order:
+		var tag := "  (you)" if v == _player else ""
+		lines.append("%d. %s%s" % [place, _racer_name(v), tag])
+		place += 1
+	_leaderboard.text = "\n".join(lines)
 
 ## Bottom-right nameplate: who is nearest to the player right now.
 func _update_closest() -> void:
@@ -110,6 +131,14 @@ func _build_ui() -> void:
 	_center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_center.visible = false
 	root.add_child(_center)
+
+	_leaderboard = Label.new()
+	_leaderboard.add_theme_font_size_override("font_size", 16)
+	_leaderboard.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	# Offset down so it clears the speed/RPM/gear/traction readout at the corner.
+	_leaderboard.offset_left = 14
+	_leaderboard.offset_top = 120
+	root.add_child(_leaderboard)
 
 	_closest = Label.new()
 	_closest.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT

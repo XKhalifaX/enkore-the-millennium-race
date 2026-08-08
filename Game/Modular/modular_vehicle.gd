@@ -35,6 +35,14 @@ extends MeridianVehicle
 			wheels.changed.connect(_on_definition_changed)
 		_rebuild()
 
+## Draw a translucent box in the editor matching the collision shape, so
+## collision_size / collision_offset can be tuned by eye. Editor-only — never
+## shown in the running game.
+@export var show_collision_preview := true:
+	set(value):
+		show_collision_preview = value
+		_rebuild()
+
 ## Inspector button to force a rebuild if the preview gets out of sync.
 @export_tool_button("Rebuild car") var rebuild_action := _rebuild
 
@@ -159,6 +167,24 @@ func _add_collision() -> void:
 	col.shape = shape
 	col.position = definition.collision_offset
 	_track(col, self)
+	if show_collision_preview and Engine.is_editor_hint():
+		_add_collision_preview()
+
+## Editor-only translucent box mirroring the chassis collider.
+func _add_collision_preview() -> void:
+	var mesh := BoxMesh.new()
+	mesh.size = definition.collision_size
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.2, 0.8, 1.0, 0.22)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	var preview := MeshInstance3D.new()
+	preview.name = "CollisionPreview"
+	preview.mesh = mesh
+	preview.material_override = mat
+	preview.position = definition.collision_offset
+	_track(preview, self)
 
 ## The wheel type fitted to this car.
 func _wheels() -> WheelDefinition:
