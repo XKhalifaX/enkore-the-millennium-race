@@ -69,8 +69,27 @@ const PRESETS := {
 	},
 }
 
+## Gearbox archetypes. Ratios are computed from the target top speed and gear
+## count, so the box always spans the speed range the track actually produces —
+## the usual cause of hunting is a gearbox geared for speeds never reached.
+const GEARBOX_PRESETS := {
+	"3-speed lazy": { "gears": 3, "top": 130.0 },
+	"4-speed arcade": { "gears": 4, "top": 140.0 },
+	"5-speed": { "gears": 5, "top": 160.0 },
+	"6-speed quick": { "gears": 6, "top": 190.0 },
+}
+const DEFAULT_GEARBOX := "Default (scene)"
+## Lower gears are spaced closer together than higher ones.
+const GEAR_SPACING_EXPONENT := 0.75
+const RPM_PER_RAD := 60.0 / TAU
+
 var _content : VBoxContainer
 var _status : Label
+var _gearbox_button : OptionButton
+var _gearbox_readout : Label
+var _gear_count := 6
+var _top_speed := 190.0
+var _default_gear_ratios : Array[float] = []
 var _preset_button : OptionButton
 var _rows : Array = []          # { key, getter, setter, snap, refresh }
 var _default_preset := {}       # captured from the scene at startup
@@ -81,8 +100,16 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if vehicle == null:
 		push_warning("VehicleTuningPanel: no vehicle assigned.")
+	else:
+		# Captured before the UI is built so the gearbox controls start truthful.
+		_default_gear_ratios = vehicle.gear_ratios.duplicate()
+		_gear_count = clampi(vehicle.gear_ratios.size(), 3, 6)
+		if not vehicle.gear_ratios.is_empty():
+			_top_speed = _speed_at_limiter(
+				vehicle.gear_ratios[vehicle.gear_ratios.size() - 1] * vehicle.final_drive)
 	_build()
 	_default_preset = _capture_current()
+	_update_gearbox_readout()
 
 func _unhandled_input(event : InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F1:
@@ -212,6 +239,17 @@ func _build() -> void:
 		func(v): vehicle.coefficient_of_drag = v,
 		"%.2f", "coefficient_of_drag = %s")
 
+	_section("Gearbox")
+	_build_gearbox_controls()
+	_slider("shift_cooldown", "Shift cooldown (s)", 0.0, 2.0, 0.05,
+		func(): return vehicle.automatic_time_between_shifts,
+		func(v): vehicle.automatic_time_between_shifts = v,
+		"%.2f", "automatic_time_between_shifts = %s")
+	_slider("downshift_point", "Downshift point", 0.3, 0.95, 0.01,
+		func(): return vehicle.automatic_downshift_ratio,
+		func(v): vehicle.automatic_downshift_ratio = v,
+		"%.2f", "automatic_downshift_ratio = %s")
+
 	var copy_btn := Button.new()
 	copy_btn.text = "Copy / print current values"
 	copy_btn.focus_mode = Control.FOCUS_NONE
@@ -223,6 +261,116 @@ func _build() -> void:
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.custom_minimum_size = Vector2(PANEL_WIDTH - 20, 0)
 	outer.add_child(_status)
+
+# --- Gearbox ---------------------------------------------------------------
+
+func _build_gearbox_controls() -> void:
+	var row := HBoxContainer.new()
+	_content.add_child(row)
+	var label := Label.new()
+	label.text = "Gearbox"
+	label.custom_minimum_size = Vector2(LABEL_WIDTH, 0)
+	row.add_child(label)
+	_gearbox_button = OptionButton.new()
+	_gearbox_button.focus_mode = Control.FOCUS_NONE
+	_gearbox_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_gearbox_button.add_item(DEFAULT_GEARBOX)
+	for preset_name in GEARBOX_PRESETS.keys():
+		_gearbox_button.add_item(preset_name)
+	_gearbox_button.item_selected.connect(_on_gearbox_selected)
+	row.add_child(_gearbox_button)
+
+	_plain_slider("Top speed (km/h)", 80.0, 280.0, 5.0, _top_speed,
+		func(v):
+			_top_speed = v
+			_apply_gearbox())
+	_plain_slider("Gears", 3.0, 6.0, 1.0, float(_gear_count),
+		func(v):
+			_gear_count = int(v)
+			_apply_gearbox())
+
+	_gearbox_readout = Label.new()
+	_gearbox_readout.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_gearbox_readout.custom_minimum_size = Vector2(PANEL_WIDTH - 40, 0)
+	_gearbox_readout.add_theme_font_size_override("font_size", 11)
+	_content.add_child(_gearbox_readout)
+
+## A slider that drives panel state rather than a vehicle property directly.
+func _plain_slider(nm : String, minv : float, maxv : float, step : float,
+		start : float, on_change : Callable) -> void:
+	var row := HBoxContainer.new()
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content.add_child(row)
+	var lbl := Label.new()
+	lbl.text = nm
+	lbl.custom_minimum_size = Vector2(LABEL_WIDTH, 0)
+	row.add_child(lbl)
+	var sld := HSlider.new()
+	sld.min_value = minv
+	sld.max_value = maxv
+	sld.step = step
+	sld.value = clampf(start, minv, maxv)
+	sld.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sld.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	sld.focus_mode = Control.FOCUS_NONE
+	row.add_child(sld)
+	var val := Label.new()
+	val.custom_minimum_size = Vector2(VALUE_WIDTH, 0)
+	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	val.text = "%d" % sld.value
+	row.add_child(val)
+	sld.value_changed.connect(func(v : float):
+		val.text = "%d" % v
+		on_change.call(v))
+
+func _on_gearbox_selected(index : int) -> void:
+	var preset_name := _gearbox_button.get_item_text(index)
+	if preset_name == DEFAULT_GEARBOX:
+		if vehicle and not _default_gear_ratios.is_empty():
+			vehicle.set_gear_ratios(_default_gear_ratios.duplicate())
+		_update_gearbox_readout()
+		return
+	var preset : Dictionary = GEARBOX_PRESETS.get(preset_name, {})
+	if preset.is_empty():
+		return
+	_gear_count = int(preset["gears"])
+	_top_speed = float(preset["top"])
+	_apply_gearbox()
+	if _status:
+		_status.text = "Gearbox: %s" % preset_name
+
+## Road speed (km/h) at which a given total ratio reaches the rev limiter.
+func _speed_at_limiter(total_ratio : float) -> float:
+	if total_ratio <= 0.0:
+		return 0.0
+	return (vehicle.max_rpm / RPM_PER_RAD) / total_ratio * _tire_radius() * 3.6
+
+func _tire_radius() -> float:
+	if vehicle.average_drive_wheel_radius > 0.0:
+		return vehicle.average_drive_wheel_radius
+	return vehicle.front_tire_radius
+
+## Ratios that make gear N top out at its share of the target top speed.
+func _apply_gearbox() -> void:
+	if vehicle == null or _gear_count < 1 or vehicle.final_drive <= 0.0:
+		return
+	var k : float = (vehicle.max_rpm / RPM_PER_RAD) * _tire_radius() * 3.6
+	var ratios : Array[float] = []
+	for i in _gear_count:
+		var fraction : float = pow(float(i + 1) / float(_gear_count), GEAR_SPACING_EXPONENT)
+		var speed : float = maxf(_top_speed * fraction, 1.0)
+		ratios.append(k / speed / vehicle.final_drive)
+	vehicle.set_gear_ratios(ratios)
+	_update_gearbox_readout()
+
+func _update_gearbox_readout() -> void:
+	if _gearbox_readout == null or vehicle == null:
+		return
+	var parts : Array[String] = []
+	for i in vehicle.gear_ratios.size():
+		var speed := _speed_at_limiter(vehicle.gear_ratios[i] * vehicle.final_drive)
+		parts.append("%d:%.0f" % [i + 1, speed])
+	_gearbox_readout.text = "upshift km/h  " + "  ".join(parts)
 
 func _section(title : String) -> void:
 	if _content.get_child_count() > 0:
@@ -368,6 +516,12 @@ func _on_copy() -> void:
 		else:
 			sval = String.num(float(v), 3)
 		lines.append(r["snap"] % sval)
+	if vehicle and not vehicle.gear_ratios.is_empty():
+		var ratios : Array[String] = []
+		for r in vehicle.gear_ratios:
+			ratios.append(String.num(r, 3))
+		lines.append("gear_ratios = Array[float]([%s])" % ", ".join(ratios))
+		lines.append("final_drive = %s" % String.num(vehicle.final_drive, 3))
 	var text := "\n".join(lines)
 	print("\n" + text + "\n")
 	DisplayServer.clipboard_set(text)

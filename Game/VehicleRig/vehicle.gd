@@ -133,9 +133,16 @@ extends RigidBody3D
 @export var shift_time := 0.3
 ## Enables automatic gear changes
 @export var automatic_transmission := true
-## Timer to prevent the automatic gear shifts changing gears too quickly 
-## in milliseconds
-@export var automatic_time_between_shifts := 1000.0
+## Minimum time in seconds between automatic gear changes. Raise it to stop the
+## gearbox hunting between two gears when corner and straight speeds sit either
+## side of a shift point.
+## [br][br]
+## [b]Note:[/b] this was previously declared but never used. It is now enforced.
+@export var automatic_time_between_shifts := 0.5
+## The automatic downshifts when the gear below would sit under this fraction of
+## [member max_rpm]. Lower values hold gears longer through corners and widen the
+## gap between the up- and down-shift points, which is what prevents hunting.
+@export_range(0.3, 0.95, 0.01) var automatic_downshift_ratio := 0.75
 ## Drivetrain inertia
 @export var gear_inertia := 0.02
 
@@ -838,27 +845,41 @@ func process_transmission() -> void:
 			if current_gear < gear_ratios.size():
 				if current_gear > 0:
 					if current_ideal_gear_rpm > max_rpm:
-						if delta_time - last_shift_delta_time > shift_time:
+						if _can_auto_shift():
 							shift(1)
 					if current_ideal_gear_rpm > max_rpm * 0.8 and current_real_gear_rpm > max_rpm:
-						if delta_time - last_shift_delta_time > shift_time:
+						if _can_auto_shift():
 							shift(1)
 				elif current_gear == 0 and motor_rpm > maxf(clutch_out_rpm, idle_rpm):
 					shift(1)
 			if current_gear - 1 > 0:
-				if current_gear > 1 and previous_gear_rpm < 0.75 * max_rpm:
-					if delta_time - last_shift_delta_time > shift_time:
+				if current_gear > 1 and previous_gear_rpm < automatic_downshift_ratio * max_rpm:
+					if _can_auto_shift():
 						shift(-1)
 		
 		if absf(current_gear) <= 1 and brake_input > 0.75:
 			if not reversing:
 				if speed < 1.0 or local_velocity.z > 0.0:
-					if delta_time - last_shift_delta_time > shift_time:
+					if _can_auto_shift():
 						shift(-1)
 			else:
 				if speed < 1.0 or local_velocity.z < 0.0:
-					if delta_time - last_shift_delta_time > shift_time:
+					if _can_auto_shift():
 						shift(1)
+
+## Automatic shifts are rate limited so the box cannot oscillate between two
+## gears when the track keeps crossing a shift point.
+func _can_auto_shift() -> bool:
+	return delta_time - last_shift_delta_time > maxf(shift_time, automatic_time_between_shifts)
+
+## Replaces the gearbox at runtime, keeping the selected gear valid.
+func set_gear_ratios(new_ratios : Array[float]) -> void:
+	if new_ratios.is_empty():
+		return
+	gear_ratios = new_ratios
+	current_gear = clampi(current_gear, -1, gear_ratios.size())
+	requested_gear = current_gear
+	is_shifting = false
 
 func process_drive(delta : float) -> void:
 	var current_gear_ratio := get_gear_ratio(current_gear)
