@@ -39,6 +39,12 @@ extends Resource
 @export var collision_size := Vector3(1.8, 1.0, 4.4)
 @export var collision_offset := Vector3(0.0, 0.575, 0.152)
 
+@export_group("Handling")
+## Handling archetype applied to this car at spawn (steering, grip, stability,
+## power, aero — the same presets as the F1 tuning panel). "Scene default"
+## leaves the vehicle's own values untouched.
+@export var handling_preset: HandlingPresets.Preset = HandlingPresets.Preset.SCENE_DEFAULT
+
 @export_group("Gearbox")
 ## How this car's automatic gearbox is geared. "Scene default" keeps whatever
 ## ratios the vehicle already has; the presets and Custom recompute the ratios

@@ -26,48 +26,7 @@ const DEFAULT_PRESET := "Default (scene)"
 ## Handling archetypes. Only live-tunable parameters are included — mass and
 ## suspension are baked when the vehicle initializes, so a Truck here is
 ## sluggish and low-grip rather than physically heavier.
-const PRESETS := {
-	"Muscle Car": {
-		"steer_deg": 38.0, "steer_speed": 3.6, "countersteer_speed": 10.0,
-		"steer_decay": 0.22, "steer_exponent": 1.6, "countersteer_assist": 0.70,
-		"throttle_speed": 16.0, "brake_speed": 9.0, "max_torque": 650.0, "tcs_slip": 14.0,
-		"friction": 2.00, "stiffness": 4.5, "lateral_assist": 0.03,
-		"stability": true, "yaw_strength": 1.6, "yaw_ground": 3.2,
-		"drag": 0.36,
-	},
-	"Sedan": {
-		"steer_deg": 40.0, "steer_speed": 4.5, "countersteer_speed": 12.0,
-		"steer_decay": 0.20, "steer_exponent": 1.4, "countersteer_assist": 0.90,
-		"throttle_speed": 20.0, "brake_speed": 12.0, "max_torque": 300.0, "tcs_slip": 6.0,
-		"friction": 2.40, "stiffness": 6.5, "lateral_assist": 0.08,
-		"stability": true, "yaw_strength": 3.0, "yaw_ground": 4.0,
-		"drag": 0.31,
-	},
-	"Formula One": {
-		"steer_deg": 26.0, "steer_speed": 7.0, "countersteer_speed": 16.0,
-		"steer_decay": 0.14, "steer_exponent": 1.2, "countersteer_assist": 0.60,
-		"throttle_speed": 34.0, "brake_speed": 26.0, "max_torque": 780.0, "tcs_slip": 4.0,
-		"friction": 4.60, "stiffness": 16.0, "lateral_assist": 0.14,
-		"stability": true, "yaw_strength": 4.5, "yaw_ground": 5.0,
-		"drag": 0.85,
-	},
-	"Truck": {
-		"steer_deg": 34.0, "steer_speed": 2.4, "countersteer_speed": 7.0,
-		"steer_decay": 0.35, "steer_exponent": 1.8, "countersteer_assist": 0.80,
-		"throttle_speed": 8.0, "brake_speed": 6.0, "max_torque": 820.0, "tcs_slip": 16.0,
-		"friction": 1.80, "stiffness": 3.5, "lateral_assist": 0.02,
-		"stability": true, "yaw_strength": 1.2, "yaw_ground": 2.5,
-		"drag": 0.75,
-	},
-	"SUV": {
-		"steer_deg": 37.0, "steer_speed": 3.3, "countersteer_speed": 9.0,
-		"steer_decay": 0.26, "steer_exponent": 1.6, "countersteer_assist": 0.80,
-		"throttle_speed": 13.0, "brake_speed": 8.0, "max_torque": 430.0, "tcs_slip": 10.0,
-		"friction": 2.10, "stiffness": 4.8, "lateral_assist": 0.04,
-		"stability": true, "yaw_strength": 2.0, "yaw_ground": 3.4,
-		"drag": 0.52,
-	},
-}
+# Handling archetypes now live in HandlingPresets (shared with AI definitions).
 
 ## Gearbox archetypes. Ratios are computed from the target top speed and gear
 ## count, so the box always spans the speed range the track actually produces —
@@ -91,6 +50,7 @@ var _gear_count := 6
 var _top_speed := 190.0
 var _default_gear_ratios : Array[float] = []
 var _preset_button : OptionButton
+var _handling_values := {}      # preset display name -> value table (from HandlingPresets)
 var _rows : Array = []          # { key, getter, setter, snap, refresh }
 var _default_preset := {}       # captured from the scene at startup
 var _current_preset := DEFAULT_PRESET
@@ -147,8 +107,10 @@ func _build() -> void:
 	_preset_button.focus_mode = Control.FOCUS_NONE
 	_preset_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_preset_button.add_item(DEFAULT_PRESET)
-	for preset_name in PRESETS.keys():
-		_preset_button.add_item(preset_name)
+	for preset in HandlingPresets.ORDER:
+		var nm: String = HandlingPresets.NAMES[preset]
+		_handling_values[nm] = HandlingPresets.DATA[preset]
+		_preset_button.add_item(nm)
 	_preset_button.item_selected.connect(_on_preset_selected)
 	preset_row.add_child(_preset_button)
 
@@ -454,7 +416,7 @@ func _on_preset_selected(index : int) -> void:
 	var preset_name := _preset_button.get_item_text(index)
 	var values : Dictionary = _default_preset
 	if preset_name != DEFAULT_PRESET:
-		values = PRESETS.get(preset_name, {})
+		values = _handling_values.get(preset_name, {})
 	_apply_preset(values)
 	_current_preset = preset_name
 	if _status:

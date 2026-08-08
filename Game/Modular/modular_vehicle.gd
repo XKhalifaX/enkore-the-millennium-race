@@ -66,6 +66,11 @@ func _ready() -> void:
 	if spec and spec.tire_radius > 0.0:
 		front_tire_radius = spec.tire_radius
 		rear_tire_radius = spec.tire_radius
+	# Handling is applied BEFORE init so its grip values propagate into the
+	# wheels as they are set up; the gearbox is applied AFTER init because it
+	# needs average_drive_wheel_radius, which init computes.
+	if definition:
+		HandlingPresets.apply(self, definition.handling_preset)
 	super()
 	_apply_gearbox_from_definition()
 
